@@ -26,7 +26,9 @@ public final class Main extends JavaPlugin {
         bossManager.registerDefaultBosses();
 
         // Registrar comando
-        getCommand("boss").setExecutor(new BossCommand(this));
+        BossCommand bossCommand = new BossCommand(this);
+        getCommand("boss").setExecutor(bossCommand);
+        getCommand("boss").setTabCompleter(bossCommand);
 
         // Registrar eventos
         getServer().getPluginManager().registerEvents(new BossListener(this), this);
