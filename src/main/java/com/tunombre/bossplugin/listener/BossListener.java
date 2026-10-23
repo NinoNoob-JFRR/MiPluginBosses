@@ -43,7 +43,7 @@ public class BossListener implements Listener {
 
         // Anunciar muerte en el servidor
         Component announce = Component.text("☠️ ")
-                .append(Component.text(boss.getDisplayName()))
+                .append(boss.getDisplayName())
                 .append(Component.text(" ha sido derrotado por un héroe!").color(NamedTextColor.RED));
         plugin.getServer().broadcast(announce);
 
