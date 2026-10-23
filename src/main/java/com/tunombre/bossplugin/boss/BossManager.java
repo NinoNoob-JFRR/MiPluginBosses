@@ -116,8 +116,8 @@ public class BossManager {
         plugin.getLogger().info("Jefe invocado: " + boss.getKey() + " (" + entity.getUniqueId() + ")");
 
         player.sendMessage(Component.text("¡Has invocado a ")
-                .append(Component.text(boss.getDisplayName()))
-                .append(Component.text("!"));
+                .append(boss.getDisplayName())
+                .append(Component.text("!")));
     }
 
     private void applyAttributes(LivingEntity entity, Boss boss) {
