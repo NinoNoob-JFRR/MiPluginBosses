@@ -20,7 +20,7 @@ import java.util.UUID;
 public class BossBarTask implements Runnable {
 
     private final Main plugin;
-    private final BossManager bossManager;
+    private BossManager bossManager;
     private final Map<UUID, BossBar> bossBars = new java.util.HashMap<>();
 
     public BossBarTask(Main plugin, BossManager bossManager) {
@@ -54,7 +54,8 @@ public class BossBarTask implements Runnable {
 
     private BossBar createBar(Boss boss) {
         return plugin.getServer().createBossBar(
-                boss.getDisplayName(),
+                net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                        .legacySection().serialize(boss.getDisplayName()),
                 BarColor.RED,
                 BarStyle.SOLID
         );
