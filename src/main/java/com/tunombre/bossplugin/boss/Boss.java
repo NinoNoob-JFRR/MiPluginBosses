@@ -31,7 +31,8 @@ public class Boss {
                 double maxHealth, double attackDamage, double movementSpeed,
                 double armor, double armorToughness, double dropChance) {
         this.key = key;
-        this.displayName = Component.text(displayName);
+        this.displayName = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                .legacySection().deserialize(displayName);
         this.entityType = entityType;
         this.maxHealth = maxHealth;
         this.attackDamage = attackDamage;
@@ -62,9 +63,7 @@ public class Boss {
             if (glowing) {
                 meta.setEnchantmentGlintOverride(true);
             }
-            if (meta instanceof org.bukkit.inventory.meta.Damageable damageable) {
-                damageable.setUnbreakable(true);
-            }
+            meta.setUnbreakable(true);
             item.setItemMeta(meta);
         }
         drops.add(item);
@@ -114,13 +113,11 @@ public class Boss {
     }
 
     public boolean hasAttribute(Attribute attribute) {
-        return switch (attribute) {
-            case MAX_HEALTH -> maxHealth > 0;
-            case ATTACK_DAMAGE -> attackDamage > 0;
-            case MOVEMENT_SPEED -> movementSpeed > 0;
-            case ARMOR -> armor > 0;
-            case ARMOR_TOUGHNESS -> armorToughness > 0;
-            default -> false;
-        };
+        if (attribute == Attribute.MAX_HEALTH) return maxHealth > 0;
+        if (attribute == Attribute.ATTACK_DAMAGE) return attackDamage > 0;
+        if (attribute == Attribute.MOVEMENT_SPEED) return movementSpeed > 0;
+        if (attribute == Attribute.ARMOR) return armor > 0;
+        if (attribute == Attribute.ARMOR_TOUGHNESS) return armorToughness > 0;
+        return false;
     }
 }
