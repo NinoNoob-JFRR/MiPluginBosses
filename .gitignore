@@ -1,0 +1,28 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.pom
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/
+settings.xml
+
+# Logs
+*.log
