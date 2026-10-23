@@ -60,9 +60,11 @@ public class Boss {
             meta.displayName(Component.text(name).color(NamedTextColor.YELLOW));
             meta.lore(List.of(Component.text(lore).color(NamedTextColor.GRAY)));
             if (glowing) {
-                item.setGlowing(true);
+                meta.setEnchantmentGlintOverride(true);
             }
-            meta.setUnbreakable(true);
+            if (meta instanceof org.bukkit.inventory.meta.Damageable damageable) {
+                damageable.setUnbreakable(true);
+            }
             item.setItemMeta(meta);
         }
         drops.add(item);
@@ -113,11 +115,11 @@ public class Boss {
 
     public boolean hasAttribute(Attribute attribute) {
         return switch (attribute) {
-            case GENERIC_MAX_HEALTH -> maxHealth > 0;
-            case GENERIC_ATTACK_DAMAGE -> attackDamage > 0;
-            case GENERIC_MOVEMENT_SPEED -> movementSpeed > 0;
-            case GENERIC_ARMOR -> armor > 0;
-            case GENERIC_ARMOR_TOUGHNESS -> armorToughness > 0;
+            case MAX_HEALTH -> maxHealth > 0;
+            case ATTACK_DAMAGE -> attackDamage > 0;
+            case MOVEMENT_SPEED -> movementSpeed > 0;
+            case ARMOR -> armor > 0;
+            case ARMOR_TOUGHNESS -> armorToughness > 0;
             default -> false;
         };
     }
