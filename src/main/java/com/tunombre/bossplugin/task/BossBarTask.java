@@ -53,7 +53,7 @@ public class BossBarTask implements Runnable {
             }
 
             BossBar bar = bossBars.computeIfAbsent(uuid, id -> createBar(boss));
-            updateBar(entity, bar);
+            updateBar(entity, bar, boss);
         });
     }
 
@@ -66,10 +66,21 @@ public class BossBarTask implements Runnable {
         );
     }
 
-    private void updateBar(LivingEntity entity, BossBar bar) {
+    private void updateBar(LivingEntity entity, BossBar bar, Boss boss) {
         double health = entity.getHealth();
         double max = entity.getMaxHealth();
-        bar.setProgress(max > 0 ? health / max : 0.0);
+        bar.setProgress(max > 0 ? Math.max(0.0, Math.min(1.0, health / max)) : 0.0);
+
+        // Mostrar vida restante / vida total en el titulo de la barra
+        int restante = (int) Math.ceil(Math.max(0.0, health));
+        int total = (int) Math.round(max);
+        Component titulo = boss.getDisplayName()
+                .append(Component.text(" " + restante + "/" + total, NamedTextColor.WHITE));
+        String tituloLegacy = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                .legacySection().serialize(titulo);
+        if (!tituloLegacy.equals(bar.getTitle())) {
+            bar.setTitle(tituloLegacy);
+        }
 
         double maxDist = plugin.getConfig().getInt("bossbar-max-distance", 100);
 
