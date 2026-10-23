@@ -49,7 +49,7 @@ public class BossListener implements Listener {
 
         // Soltar botín del jefe
         entity.getWorld().dropItemNaturally(entity.getLocation(),
-                org.bukkit.Material.EXPERIENCE_BOTTLE, 10); // bonus de experiencia
+                new org.bukkit.inventory.ItemStack(org.bukkit.Material.EXPERIENCE_BOTTLE, 10)); // bonus de experiencia
 
         for (org.bukkit.inventory.ItemStack drop : boss.getDrops()) {
             if (random.nextDouble() <= boss.getDropChance()) {
