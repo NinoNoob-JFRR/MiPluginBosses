@@ -33,8 +33,8 @@ public final class Main extends JavaPlugin {
         // Registrar eventos
         getServer().getPluginManager().registerEvents(new BossListener(this), this);
 
-        // Iniciar tarea de actualización de barras de jefe (cada 2 ticks = 0.1s)
-        getServer().getScheduler().runTaskTimer(this, bossBarTask, 0L, 2L);
+        // Iniciar tarea de actualización de barras de jefe cada 5 ticks (0.25 s)
+        getServer().getScheduler().runTaskTimer(this, bossBarTask, 0L, 5L);
 
         getLogger().info("MiPluginBosses ha sido activado en Minecraft 26.3!");
     }
