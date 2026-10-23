@@ -7,15 +7,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Comando /boss <invocar|listar|recargar> [tipo]
  */
-public class BossCommand implements CommandExecutor {
+public class BossCommand implements CommandExecutor, TabCompleter {
 
     private final Main plugin;
 
@@ -94,13 +96,23 @@ public class BossCommand implements CommandExecutor {
         }
     }
 
-    public List<String> tabComplete(String[] args) {
+    @Override
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command,
+                                      @NotNull String alias, @NotNull String[] args) {
         if (args.length == 1) {
-            return List.of("invocar", "listar", "recargar");
+            return filter(List.of("invocar", "listar", "recargar"), args[0]);
         }
         if (args.length == 2 && args[0].equalsIgnoreCase("invocar")) {
-            return plugin.getBossManager().getBosses().keySet().stream().toList();
+            return filter(plugin.getBossManager().getBosses().keySet(), args[1]);
         }
         return List.of();
+    }
+
+    private List<String> filter(Collection<String> options, String prefix) {
+        String p = prefix.toLowerCase();
+        return options.stream()
+                .filter(o -> o.toLowerCase().startsWith(p))
+                .sorted()
+                .toList();
     }
 }
