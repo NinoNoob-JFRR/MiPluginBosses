@@ -60,7 +60,7 @@ public class BossManager {
                 .addDrop(org.bukkit.Material.GLOWSTONE_DUST, "Polvo de Piedra Luminosa", 16));
 
         // Guardián Ancestral - jefe basado en Guardián
-        registerBoss(new Boss("guardián_ancestral", "§3§lGuardián Ancestral", EntityType.GUARDIAN,
+        registerBoss(new Boss("guardian_ancestral", "§3§lGuardián Ancestral", EntityType.GUARDIAN,
                         500.0, 11.0, 0.20, 6.0, 3.0, 0.65)
                 .addRareDrop(org.bukkit.Material.PRISMARINE_SHARD, "Fragmento de Prismarina Antigua",
                         "Reliquia del océano profundo", 4, true)
@@ -100,6 +100,11 @@ public class BossManager {
         entity.customName(boss.getDisplayName());
         entity.setCustomNameVisible(true);
         entity.setRemoveWhenFarAway(false);
+
+        // Ocultar la barra de vida vanilla (Wither, Dragon) para no duplicar la barra
+        if (entity instanceof org.bukkit.entity.Boss vanillaBoss) {
+            vanillaBoss.getBossBar().setVisible(false);
+        }
 
         // Aplicar atributos
         applyAttributes(entity, boss);
