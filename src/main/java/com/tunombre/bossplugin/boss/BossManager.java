@@ -97,7 +97,7 @@ public class BossManager {
         org.bukkit.Location loc = player.getLocation();
 
         LivingEntity entity = (LivingEntity) world.spawnEntity(loc, boss.getEntityType());
-        entity.setCustomName(boss.getDisplayName());
+        entity.customName(boss.getDisplayName());
         entity.setCustomNameVisible(true);
         entity.setRemoveWhenFarAway(false);
 
