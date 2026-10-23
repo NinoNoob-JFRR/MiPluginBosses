@@ -83,16 +83,18 @@ public class BossBarTask implements Runnable {
         }
 
         double maxDist = plugin.getConfig().getInt("bossbar-max-distance", 100);
+        double maxDistSq = maxDist * maxDist;
+        org.bukkit.Location bossLoc = entity.getLocation();
 
         // Añadir jugadores cercanos
         entity.getWorld().getPlayers().stream()
-                .filter(p -> p.getLocation().distance(entity.getLocation()) <= maxDist)
+                .filter(p -> p.getLocation().distanceSquared(bossLoc) <= maxDistSq)
                 .filter(p -> !bar.getPlayers().contains(p))
                 .forEach(bar::addPlayer);
 
         // Remover jugadores lejanos
         bar.getPlayers().forEach(p -> {
-            if (p.getLocation().distance(entity.getLocation()) > maxDist) {
+            if (p.getLocation().distanceSquared(bossLoc) > maxDistSq) {
                 bar.removePlayer(p);
             }
         });
@@ -117,12 +119,7 @@ public class BossBarTask implements Runnable {
     }
 
     private LivingEntity findEntity(UUID uuid) {
-        return plugin.getServer().getWorlds().stream()
-                .flatMap(w -> w.getEntities().stream())
-                .filter(LivingEntity.class::isInstance)
-                .map(LivingEntity.class::cast)
-                .filter(e -> e.getUniqueId().equals(uuid))
-                .findFirst()
-                .orElse(null);
+        org.bukkit.entity.Entity entity = plugin.getServer().getEntity(uuid);
+        return entity instanceof LivingEntity living ? living : null;
     }
 }
