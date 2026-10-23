@@ -4,7 +4,7 @@ import com.tunombre.bossplugin.Main;
 import com.tunombre.bossplugin.task.BossBarTask;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.bukkit.Attribute;
+import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -121,25 +121,25 @@ public class BossManager {
     }
 
     private void applyAttributes(LivingEntity entity, Boss boss) {
-        if (boss.hasAttribute(Attribute.GENERIC_MAX_HEALTH)) {
-            var attr = entity.getAttribute(Attribute.GENERIC_MAX_HEALTH);
+        if (boss.hasAttribute(Attribute.MAX_HEALTH)) {
+            var attr = entity.getAttribute(Attribute.MAX_HEALTH);
             if (attr != null) attr.setBaseValue(boss.getMaxHealth());
             entity.setHealth(entity.getMaxHealth());
         }
-        if (boss.hasAttribute(Attribute.GENERIC_ATTACK_DAMAGE)) {
-            var attr = entity.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE);
+        if (boss.hasAttribute(Attribute.ATTACK_DAMAGE)) {
+            var attr = entity.getAttribute(Attribute.ATTACK_DAMAGE);
             if (attr != null) attr.setBaseValue(boss.getAttackDamage());
         }
-        if (boss.hasAttribute(Attribute.GENERIC_MOVEMENT_SPEED)) {
-            var attr = entity.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED);
+        if (boss.hasAttribute(Attribute.MOVEMENT_SPEED)) {
+            var attr = entity.getAttribute(Attribute.MOVEMENT_SPEED);
             if (attr != null) attr.setBaseValue(boss.getMovementSpeed());
         }
-        if (boss.hasAttribute(Attribute.GENERIC_ARMOR)) {
-            var attr = entity.getAttribute(Attribute.GENERIC_ARMOR);
+        if (boss.hasAttribute(Attribute.ARMOR)) {
+            var attr = entity.getAttribute(Attribute.ARMOR);
             if (attr != null) attr.setBaseValue(boss.getArmor());
         }
-        if (boss.hasAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS)) {
-            var attr = entity.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS);
+        if (boss.hasAttribute(Attribute.ARMOR_TOUGHNESS)) {
+            var attr = entity.getAttribute(Attribute.ARMOR_TOUGHNESS);
             if (attr != null) attr.setBaseValue(boss.getArmorToughness());
         }
     }
