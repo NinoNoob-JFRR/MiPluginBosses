@@ -47,6 +47,11 @@ public class BossBarTask implements Runnable {
                 return;
             }
 
+            // Mantener oculta la barra vanilla (Wither/Dragon) para no duplicar
+            if (entity instanceof org.bukkit.entity.Boss vanillaBoss) {
+                vanillaBoss.getBossBar().setVisible(false);
+            }
+
             BossBar bar = bossBars.computeIfAbsent(uuid, id -> createBar(boss));
             updateBar(entity, bar);
         });
