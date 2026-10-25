@@ -1,0 +1,405 @@
+# ============================================================
+# MiPluginBosses - Catalogo de habilidades de jefe
+# ============================================================
+# Habilidades reutilizables. Cada jefe elige las suyas en bosses.yml.
+# Los valores se pueden sobrescribir por jefe.
+#
+# Triggers:
+#   TIMER             -> cada interval_seconds
+#   ON_SPAWN          -> al aparecer
+#   ON_DAMAGE_TAKEN   -> al recibir dano (chance)
+#   ON_DAMAGE_DEALT   -> al hacer dano (chance)
+#   ON_HEALTH         -> al bajar de un umbral de vida
+#   ON_DEATH          -> al morir
+#   ON_PLAYER_DISTANCE-> cuando un jugador entra en radio
+#
+# Arquetipos:
+#   BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER
+# ============================================================
+
+boss_abilities:
+
+  ground_slam:
+    name: "GroundSlam"
+    description: "Golpea el suelo y empuja a los jugadores cercanos."
+    trigger: TIMER
+    interval_seconds: 8
+    chance: 100
+    archetypes: [BRUTE, COLOSSUS]
+    effects:
+      - type: AOE_DAMAGE
+        radius: 6
+        damage_multiplier: 1.2
+      - type: KNOCKBACK
+        radius: 6
+        force: 0.8
+
+  charge:
+    name: "Charge"
+    description: "Embiste hacia el jugador mas cercano."
+    trigger: TIMER
+    interval_seconds: 10
+    chance: 100
+    archetypes: [BRUTE, BERSERKER]
+    effects:
+      - type: DASH
+        max_distance: 15
+        speed_multiplier: 2.0
+        damage_multiplier: 1.1
+        knockback: 0.9
+
+  cleave:
+    name: "Cleave"
+    description: "Su golpe alcanza a los jugadores cercanos al objetivo."
+    trigger: ON_DAMAGE_DEALT
+    chance: 50
+    archetypes: [BRUTE]
+    effects:
+      - type: SPLASH
+        radius: 3
+        damage_percent: 60
+
+  shockwave:
+    name: "Shockwave"
+    description: "Anillo de fuerza que ralentiza."
+    trigger: TIMER
+    interval_seconds: 9
+    chance: 100
+    archetypes: [COLOSSUS]
+    effects:
+      - type: AOE_DAMAGE
+        radius: 7
+        damage_multiplier: 0.9
+      - type: POTION
+        effect: SLOWNESS
+        level: 2
+        duration_seconds: 3
+        radius: 7
+        target: PLAYERS
+
+  pull:
+    name: "Pull"
+    description: "Atrae a los jugadores hacia el jefe."
+    trigger: TIMER
+    interval_seconds: 12
+    chance: 100
+    archetypes: [COLOSSUS]
+    effects:
+      - type: PULL
+        radius: 12
+        force: 1.0
+
+  wither_aura:
+    name: "WitherAura"
+    description: "Aura de marchitamiento."
+    trigger: TIMER
+    interval_seconds: 6
+    chance: 100
+    archetypes: [COLOSSUS]
+    effects:
+      - type: POTION
+        effect: WITHER
+        level: 1
+        duration_seconds: 4
+        radius: 6
+        target: PLAYERS
+
+  summon_minions:
+    name: "SummonMinions"
+    description: "Invoca esbirros del tier del jefe."
+    trigger: TIMER
+    interval_seconds: 14
+    chance: 100
+    archetypes: [SUMMONER]
+    effects:
+      - type: SUMMON
+        entity: ZOMBIE
+        min: 2
+        max: 4
+        radius: 4
+
+  summon_elite:
+    name: "SummonElite"
+    description: "Invoca un esbirro elite al bajar de vida."
+    trigger: ON_HEALTH
+    health_thresholds: [0.75, 0.50, 0.25]
+    once_per_threshold: true
+    archetypes: [SUMMONER]
+    effects:
+      - type: SUMMON
+        entity: WITHER_SKELETON
+        min: 1
+        max: 1
+        radius: 3
+        elite: true
+
+  meteor_rain:
+    name: "MeteorRain"
+    description: "Lluvia de meteoros en el area."
+    trigger: TIMER
+    interval_seconds: 15
+    chance: 100
+    archetypes: [SUMMONER, COLOSSUS]
+    effects:
+      - type: METEOR
+        count: 5
+        radius: 8
+        damage_multiplier: 0.8
+        fall_ticks: 30
+
+  life_drain:
+    name: "LifeDrain"
+    description: "Roba vida al hacer dano."
+    trigger: ON_DAMAGE_DEALT
+    chance: 100
+    archetypes: [STALKER]
+    effects:
+      - type: SELF_HEAL
+        percent_of_damage: 30
+
+  shadow_step:
+    name: "ShadowStep"
+    description: "Se teletransporta detras de un jugador."
+    trigger: TIMER
+    interval_seconds: 10
+    chance: 100
+    archetypes: [STALKER]
+    effects:
+      - type: TELEPORT
+        mode: BEHIND
+        max_distance: 20
+
+  blinding_dust:
+    name: "BlindingDust"
+    description: "Ciega al atacante."
+    trigger: ON_DAMAGE_TAKEN
+    chance: 25
+    archetypes: [STALKER]
+    effects:
+      - type: DEBUFF
+        effect: BLINDNESS
+        level: 1
+        duration_seconds: 4
+        target: ATTACKER
+
+  poison_cloud:
+    name: "PoisonCloud"
+    description: "Nube de veneno en el area."
+    trigger: TIMER
+    interval_seconds: 10
+    chance: 100
+    archetypes: [STALKER]
+    effects:
+      - type: POTION
+        effect: POISON
+        level: 2
+        duration_seconds: 6
+        radius: 5
+        target: PLAYERS
+
+  arrow_volley:
+    name: "ArrowVolley"
+    description: "Dispara una ráfaga de flechas."
+    trigger: TIMER
+    interval_seconds: 7
+    chance: 100
+    archetypes: [RANGER]
+    effects:
+      - type: PROJECTILE
+        projectile: ARROW
+        count: 6
+        spread: 15
+        homing: false
+        damage_multiplier: 1.0
+
+  homing_shot:
+    name: "HomingShot"
+    description: "Proyectil teledirigido."
+    trigger: TIMER
+    interval_seconds: 9
+    chance: 100
+    archetypes: [RANGER]
+    effects:
+      - type: PROJECTILE
+        projectile: ARROW
+        count: 1
+        spread: 0
+        homing: true
+        damage_multiplier: 1.0
+
+  web_trap:
+    name: "WebTrap"
+    description: "Campo de telarana que ralentiza."
+    trigger: TIMER
+    interval_seconds: 12
+    chance: 100
+    archetypes: [RANGER]
+    effects:
+      - type: POTION
+        effect: SLOWNESS
+        level: 3
+        duration_seconds: 4
+        radius: 6
+        target: PLAYERS
+
+  frenzy:
+    name: "Frenzy"
+    description: "Se enfurece al bajar de 50% de vida."
+    trigger: ON_HEALTH
+    health_thresholds: [0.50]
+    once_per_threshold: true
+    archetypes: [BERSERKER]
+    effects:
+      - type: BUFF
+        speed_percent: 30
+        damage_percent: 20
+        permanent: true
+
+  enrage:
+    name: "Enrage"
+    description: "Se enfurece al bajar de 25% de vida."
+    trigger: ON_HEALTH
+    health_thresholds: [0.25]
+    once_per_threshold: true
+    archetypes: [BERSERKER]
+    effects:
+      - type: BUFF
+        attack_speed_percent: 50
+        permanent: true
+      - type: CLEAR_DEBUFFS
+
+  blood_lust:
+    name: "BloodLust"
+    description: "Se cura al hacer dano."
+    trigger: ON_DAMAGE_DEALT
+    chance: 100
+    archetypes: [BERSERKER]
+    effects:
+      - type: SELF_HEAL
+        percent_of_damage: 20
+
+  death_nova:
+    name: "DeathNova"
+    description: "Explosion final al morir."
+    trigger: ON_DEATH
+    chance: 100
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: DEATH_EXPLOSION
+        radius: 8
+        damage_multiplier: 1.5
+        break_blocks: false
+
+  teleport:
+    name: "Teleport"
+    description: "Se teletransporta a un jugador aleatorio."
+    trigger: TIMER
+    interval_seconds: 12
+    chance: 100
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: TELEPORT
+        mode: RANDOM
+        max_distance: 25
+
+  heal:
+    name: "Heal"
+    description: "Se cura un porcentaje de su vida maxima."
+    trigger: TIMER
+    interval_seconds: 15
+    chance: 100
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: SELF_HEAL
+        percent_max_health: 8
+
+  shield:
+    name: "Shield"
+    description: "Gana escudo de absorcion."
+    trigger: ON_HEALTH
+    health_thresholds: [0.60]
+    once_per_threshold: true
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: SHIELD
+        absorption_percent: 20
+        duration_seconds: 8
+
+  reflect:
+    name: "Reflect"
+    description: "Refleja parte del dano recibido."
+    trigger: ON_DAMAGE_TAKEN
+    chance: 20
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: REFLECT
+        percent: 25
+
+  lightning:
+    name: "Lightning"
+    description: "Rayo sobre un jugador aleatorio."
+    trigger: TIMER
+    interval_seconds: 11
+    chance: 100
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: LIGHTNING
+        targets: 1
+        damage_multiplier: 1.0
+
+  fear:
+    name: "Fear"
+    description: "Nausea y ceguera en area."
+    trigger: TIMER
+    interval_seconds: 13
+    chance: 100
+    archetypes: [STALKER, SUMMONER]
+    effects:
+      - type: POTION
+        effect: NAUSEA
+        level: 1
+        duration_seconds: 4
+        radius: 8
+        target: PLAYERS
+      - type: POTION
+        effect: BLINDNESS
+        level: 1
+        duration_seconds: 4
+        radius: 8
+        target: PLAYERS
+
+  earthquake:
+    name: "Earthquake"
+    description: "Salta y golpea el suelo con fuerza."
+    trigger: TIMER
+    interval_seconds: 14
+    chance: 100
+    archetypes: [COLOSSUS]
+    effects:
+      - type: AOE_DAMAGE
+        radius: 9
+        damage_multiplier: 1.3
+      - type: POTION
+        effect: SLOWNESS
+        level: 4
+        duration_seconds: 2
+        radius: 9
+        target: PLAYERS
+
+  frost_nova:
+    name: "FrostNova"
+    description: "Nova de hielo que ralentiza y congela."
+    trigger: TIMER
+    interval_seconds: 12
+    chance: 100
+    archetypes: [BRUTE, RANGER, SUMMONER, STALKER, COLOSSUS, BERSERKER]
+    effects:
+      - type: POTION
+        effect: SLOWNESS
+        level: 2
+        duration_seconds: 3
+        radius: 7
+        target: PLAYERS
+      - type: FREEZE
+        duration_seconds: 3
+        radius: 7

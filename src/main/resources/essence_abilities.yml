@@ -1,0 +1,760 @@
+# ============================================================
+# MiPluginBosses - Esencias de habilidad (27)
+# ============================================================
+# Cada bloque es autocontenido: mecanica, niveles, coste, lore
+# y referencia a la receta en recipes.yml.
+#
+# type:
+#   PASSIVE -> se aplica al equipo (apply_to: GEAR)
+#   ACTIVE  -> se aplica a un libro (apply_to: BOOK)
+#
+# cost.per:
+#   TRIGGER -> cada activacion
+#   Xs      -> cada X segundos mientras esta activa
+#
+# Sin cooldowns. El coste es el unico limitador.
+# Si el jugador no puede pagar, la habilidad no se activa
+# y no se muestra ningun mensaje de fallo.
+#
+# Si un nivel define food_cost, ese valor tiene prioridad
+# sobre cost.amount (usado por TreeFeller, RepairItem y Fly).
+# ============================================================
+
+abilities:
+
+  # ----------------------------------------------------------
+  # TIER 1
+  # ----------------------------------------------------------
+  poison:
+    name: "Poison"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Envenena al objetivo al golpear."
+    icon: SPIDER_EYE
+    tier: 1
+    max_level: 8
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { poison_level: 1, duration_seconds: 5 }
+      2: { poison_level: 2, duration_seconds: 5 }
+      3: { poison_level: 3, duration_seconds: 5 }
+      4: { poison_level: 4, duration_seconds: 5 }
+      5: { poison_level: 5, duration_seconds: 5 }
+      6: { poison_level: 6, duration_seconds: 5 }
+      7: { poison_level: 7, duration_seconds: 5 }
+      8: { poison_level: 8, duration_seconds: 5 }
+    combat:
+      tag_on_use: "poison"
+      notify: true
+      message: "&aHas envenenado a &e%target%&a."
+    cost: { type: FOOD, amount: 2, per: TRIGGER }
+    lore:
+      - "&7Envenena al objetivo al golpear."
+      - "&7Veneno: &aNivel %level% &7durante &a5s&7."
+    applied_lore:
+      - "&8Poison &7Nv.%level%"
+    recipe: poison
+
+  backstab:
+    name: "Backstab"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Golpe por la espalda con dano extra."
+    icon: IRON_SWORD
+    tier: 1
+    max_level: 8
+    compatible_with: [SWORD]
+    trigger: ON_BACKSTAB
+    levels:
+      1: { multiplier: 1.5 }
+      2: { multiplier: 2.0 }
+      3: { multiplier: 2.5 }
+      4: { multiplier: 3.0 }
+      5: { multiplier: 3.5 }
+      6: { multiplier: 4.0 }
+      7: { multiplier: 4.5 }
+      8: { multiplier: 5.0 }
+    combat:
+      tag_on_use: "backstab"
+      notify: true
+      message: "&aGolpe por la espalda: &ex%multiplier%&a."
+    cost: { type: FOOD, amount: 2, per: TRIGGER }
+    lore:
+      - "&7Golpear por la espalda multiplica el dano."
+      - "&7Multiplicador: &ex%multiplier%"
+    applied_lore:
+      - "&8Backstab &7Nv.%level%"
+    recipe: backstab
+
+  blinding:
+    name: "Blinding"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Ciega al objetivo al golpear."
+    icon: INK_SAC
+    tier: 1
+    max_level: 2
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { effect_level: 1, duration_seconds: 3 }
+      2: { effect_level: 1, duration_seconds: 5 }
+    combat:
+      tag_on_use: "blinding"
+      notify: true
+      message: "&aHas cegado a &e%target%&a."
+    cost: { type: FOOD, amount: 4, per: TRIGGER }
+    lore:
+      - "&7Aplica ceguera al objetivo."
+      - "&7Duracion: &a%duration_seconds%s"
+    applied_lore:
+      - "&8Blinding &7Nv.%level%"
+    recipe: blinding
+
+  call_lighting:
+    name: "CallLighting"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Invoca un rayo sobre el objetivo."
+    icon: LIGHTNING_ROD
+    tier: 1
+    max_level: 8
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { chance: 25, damage_percent: 30, radius: 3, max_targets: 2 }
+      2: { chance: 25, damage_percent: 37, radius: 3, max_targets: 2 }
+      3: { chance: 25, damage_percent: 44, radius: 4, max_targets: 3 }
+      4: { chance: 25, damage_percent: 51, radius: 4, max_targets: 3 }
+      5: { chance: 25, damage_percent: 59, radius: 4, max_targets: 4 }
+      6: { chance: 25, damage_percent: 66, radius: 5, max_targets: 4 }
+      7: { chance: 25, damage_percent: 73, radius: 5, max_targets: 5 }
+      8: { chance: 25, damage_percent: 80, radius: 5, max_targets: 5 }
+    combat:
+      tag_on_use: "call_lighting"
+      notify: true
+      message: "&eUn rayo cae sobre &c%target%&e."
+    cost: { type: FOOD, amount: 3, per: TRIGGER }
+    lore:
+      - "&7Al golpear, hay un &e25%&7 de invocar un rayo."
+      - "&7Dano: &e%damage_percent%%% &7- Radio: &e%radius%"
+      - "&7Objetivos maximos: &e%max_targets%"
+    applied_lore:
+      - "&8CallLighting &7Nv.%level%"
+    recipe: call_lighting
+
+  confuse:
+    name: "Confuse"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Confunde al objetivo con nausea."
+    icon: FERMENTED_SPIDER_EYE
+    tier: 1
+    max_level: 1
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { effect_level: 1, duration_seconds: 6 }
+    combat:
+      tag_on_use: "confuse"
+      notify: true
+      message: "&aHas confundido a &e%target%&a."
+    cost: { type: FOOD, amount: 4, per: TRIGGER }
+    lore:
+      - "&7Aplica nausea al objetivo."
+      - "&7Duracion: &a6s"
+    applied_lore:
+      - "&8Confuse"
+    recipe: confuse
+
+  disarm:
+    name: "Disarm"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Probabilidad de desarmar al objetivo."
+    icon: TRIPWIRE_HOOK
+    tier: 1
+    max_level: 5
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { chance: 10 }
+      2: { chance: 15 }
+      3: { chance: 20 }
+      4: { chance: 25 }
+      5: { chance: 30 }
+    combat:
+      tag_on_use: "disarm"
+      notify: true
+      message: "&aHas desarmado a &e%target%&a."
+    cost: { type: FOOD, amount: 1, per: TRIGGER }
+    lore:
+      - "&7Probabilidad de desarmar al objetivo."
+      - "&7Probabilidad: &e%chance%%%"
+    applied_lore:
+      - "&8Disarm &7Nv.%level%"
+    recipe: disarm
+
+  slow:
+    name: "Slow"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Ralentiza al objetivo."
+    icon: COBWEB
+    tier: 1
+    max_level: 1
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { effect_level: 1, duration_seconds: 5 }
+    combat:
+      tag_on_use: "slow"
+      notify: true
+      message: "&aHas ralentizado a &e%target%&a."
+    cost: { type: FOOD, amount: 2, per: TRIGGER }
+    lore:
+      - "&7Aplica lentitud al objetivo."
+      - "&7Duracion: &a5s"
+    applied_lore:
+      - "&8Slow"
+    recipe: slow
+
+  vampiric_regeneration:
+    name: "VampiricRegeneration"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Roba vida al golpear."
+    icon: GHAST_TEAR
+    tier: 1
+    max_level: 5
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { chance: 20, steal_percent: 5 }
+      2: { chance: 20, steal_percent: 10 }
+      3: { chance: 20, steal_percent: 15 }
+      4: { chance: 20, steal_percent: 20 }
+      5: { chance: 20, steal_percent: 25 }
+    combat:
+      tag_on_use: "vampiric_regeneration"
+      notify: true
+      message: "&aHas robado &c%steal%&a de vida."
+    cost: { type: FOOD, amount: 4, per: TRIGGER }
+    lore:
+      - "&7Al golpear, &e20%&7 de robar vida."
+      - "&7Vida robada: &c%steal_percent%%%"
+    applied_lore:
+      - "&8VampiricRegeneration &7Nv.%level%"
+    recipe: vampiric_regeneration
+
+  weaken:
+    name: "Weaken"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Debilita al objetivo."
+    icon: FERMENTED_SPIDER_EYE
+    tier: 1
+    max_level: 1
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { effect_level: 1, duration_seconds: 6 }
+    combat:
+      tag_on_use: "weaken"
+      notify: true
+      message: "&aHas debilitado a &e%target%&a."
+    cost: { type: FOOD, amount: 4, per: TRIGGER }
+    lore:
+      - "&7Aplica debilidad al objetivo."
+      - "&7Duracion: &a6s"
+    applied_lore:
+      - "&8Weaken"
+    recipe: weaken
+
+  fertilize:
+    name: "Fertilize"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Fertiliza un area como harina de huesos."
+    icon: BONE_MEAL
+    tier: 1
+    max_level: 2
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: { radius: 3 }
+      2: { radius: 5 }
+    cost: { type: FOOD, amount: 1, per: TRIGGER }
+    lore:
+      - "&7Activa: fertiliza el area alrededor."
+      - "&7Radio: &a%radius%"
+    applied_lore:
+      - "&8Fertilize &7Nv.%level%"
+    recipe: fertilize
+
+  craft_item:
+    name: "CraftItem"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Abre una mesa de crafteo portatil."
+    icon: CRAFTING_TABLE
+    tier: 1
+    max_level: 1
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: {}
+    cost: { type: FOOD, amount: 1, per: TRIGGER }
+    lore:
+      - "&7Activa: abre una mesa de crafteo."
+    applied_lore:
+      - "&8CraftItem"
+    recipe: craft_item
+
+  # ----------------------------------------------------------
+  # TIER 2
+  # ----------------------------------------------------------
+  vein_miner:
+    name: "VeinMiner"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Mina toda la veta de mineral."
+    icon: IRON_PICKAXE
+    tier: 2
+    max_level: 3
+    compatible_with: [PICKAXE]
+    trigger: ON_BLOCK_BREAK
+    levels:
+      1: { max_blocks: 16 }
+      2: { max_blocks: 32 }
+      3: { max_blocks: 64 }
+    cost: { type: FOOD, amount: 2, per: TRIGGER }
+    lore:
+      - "&7Mina toda la veta de una vez."
+      - "&7Bloques maximos: &a%max_blocks%"
+    applied_lore:
+      - "&8VeinMiner &7Nv.%level%"
+    recipe: vein_miner
+
+  tree_feller:
+    name: "TreeFeller"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Tala un arbol completo."
+    icon: IRON_AXE
+    tier: 2
+    max_level: 3
+    compatible_with: [AXE]
+    trigger: ON_BLOCK_BREAK
+    levels:
+      1: { max_logs: 64, food_cost: 10 }
+      2: { max_logs: 128, food_cost: 6 }
+      3: { max_logs: 256, food_cost: 3 }
+    cost: { type: FOOD, amount: 10, per: TRIGGER }
+    lore:
+      - "&7Tala el arbol completo."
+      - "&7Troncos maximos: &a%max_logs%"
+    applied_lore:
+      - "&8TreeFeller &7Nv.%level%"
+    recipe: tree_feller
+
+  magnet:
+    name: "Magnet"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Atrae items cercanos."
+    icon: IRON_BLOCK
+    tier: 2
+    max_level: 3
+    compatible_with: [HELMET, CHESTPLATE, LEGGINGS, BOOTS, PICKAXE, SHOVEL, HOE]
+    trigger: ON_INTERVAL
+    levels:
+      1: { radius: 4, interval_seconds: 8 }
+      2: { radius: 6, interval_seconds: 10 }
+      3: { radius: 8, interval_seconds: 12 }
+    cost: { type: FOOD, amount: 1, per: INTERVAL }
+    lore:
+      - "&7Atrae items cercanos."
+      - "&7Radio: &a%radius% &7- Cada &a%interval_seconds%s"
+    applied_lore:
+      - "&8Magnet &7Nv.%level%"
+    recipe: magnet
+
+  ender_bag:
+    name: "EnderBag"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Abre un cofre de ender portatil."
+    icon: ENDER_CHEST
+    tier: 2
+    max_level: 1
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: {}
+    cost: { type: FOOD, amount: 1, per: TRIGGER }
+    lore:
+      - "&7Activa: abre un cofre de ender."
+    applied_lore:
+      - "&8EnderBag"
+    recipe: ender_bag
+
+  # ----------------------------------------------------------
+  # TIER 3
+  # ----------------------------------------------------------
+  durability:
+    name: "Durability"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Evita perder durabilidad y repara armadura."
+    icon: OBSIDIAN
+    tier: 3
+    max_level: 8
+    compatible_with: [HELMET, CHESTPLATE, LEGGINGS, BOOTS]
+    trigger: ON_INTERVAL
+    levels:
+      1: { avoid_break_chance: 10, repair_per_interval: 1 }
+      2: { avoid_break_chance: 15, repair_per_interval: 2 }
+      3: { avoid_break_chance: 20, repair_per_interval: 3 }
+      4: { avoid_break_chance: 25, repair_per_interval: 4 }
+      5: { avoid_break_chance: 30, repair_per_interval: 5 }
+      6: { avoid_break_chance: 35, repair_per_interval: 6 }
+      7: { avoid_break_chance: 40, repair_per_interval: 7 }
+      8: { avoid_break_chance: 45, repair_per_interval: 8 }
+    interval_seconds: 5
+    cost: { type: FOOD, amount: 1, per: INTERVAL }
+    lore:
+      - "&7Evita perder durabilidad."
+      - "&7Probabilidad: &a%avoid_break_chance%%%"
+      - "&7Repara &a%repair_per_interval%&7 durabilidad cada &a5s&7."
+    applied_lore:
+      - "&8Durability &7Nv.%level%"
+    recipe: durability
+
+  regeneration:
+    name: "Regeneration"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Regeneracion pasiva."
+    icon: GOLDEN_APPLE
+    tier: 3
+    max_level: 5
+    compatible_with: [HELMET, CHESTPLATE, LEGGINGS, BOOTS]
+    trigger: ON_INTERVAL
+    levels:
+      1: { effect_level: 1, duration_seconds: 5 }
+      2: { effect_level: 2, duration_seconds: 5 }
+      3: { effect_level: 3, duration_seconds: 5 }
+      4: { effect_level: 4, duration_seconds: 5 }
+      5: { effect_level: 5, duration_seconds: 5 }
+    interval_seconds: 5
+    cost: { type: FOOD, amount: 1, per: INTERVAL }
+    lore:
+      - "&7Aplica regeneracion cada &a5s&7."
+      - "&7Nivel: &a%effect_level%"
+    applied_lore:
+      - "&8Regeneration &7Nv.%level%"
+    recipe: regeneration
+
+  bleed:
+    name: "Bleed"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Hace sangrar al objetivo."
+    icon: REDSTONE_BLOCK
+    tier: 3
+    max_level: 4
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { damage_per_second: 1, duration_seconds: 3 }
+      2: { damage_per_second: 2, duration_seconds: 4 }
+      3: { damage_per_second: 3, duration_seconds: 5 }
+      4: { damage_per_second: 4, duration_seconds: 6 }
+    combat:
+      tag_on_use: "bleed"
+      notify: true
+      message: "&c%target% esta sangrando."
+    cost: { type: FOOD, amount: 3, per: TRIGGER }
+    lore:
+      - "&7El objetivo sangra al golpear."
+      - "&7Dano: &c%damage_per_second%/s &7durante &c%duration_seconds%s"
+    applied_lore:
+      - "&8Bleed &7Nv.%level%"
+    recipe: bleed
+
+  armor_piercer:
+    name: "ArmorPiercer"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Ignora parte de la armadura del objetivo."
+    icon: DIAMOND_SWORD
+    tier: 3
+    max_level: 4
+    compatible_with: [SWORD, AXE]
+    trigger: ON_HIT
+    levels:
+      1: { ignore_armor_percent: 10 }
+      2: { ignore_armor_percent: 20 }
+      3: { ignore_armor_percent: 30 }
+      4: { ignore_armor_percent: 40 }
+    combat:
+      tag_on_use: "armor_piercer"
+      notify: true
+      message: "&aHas perforado la armadura de &e%target%&a."
+    cost: { type: FOOD, amount: 3, per: TRIGGER }
+    lore:
+      - "&7Ignora parte de la armadura."
+      - "&7Armadura ignorada: &a%ignore_armor_percent%%%"
+    applied_lore:
+      - "&8ArmorPiercer &7Nv.%level%"
+    recipe: armor_piercer
+
+  waypoint:
+    name: "Waypoint"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Guarda y teletransporta a puntos."
+    icon: ENDER_PEARL
+    tier: 3
+    max_level: 3
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: { max_slots: 5 }
+      2: { max_slots: 15 }
+      3: { max_slots: 45 }
+    cost:
+      save: { type: FOOD, amount: 2 }
+      teleport: { type: FOOD, amount: 5 }
+      delete: { type: FOOD, amount: 0 }
+    waypoint:
+      cross_dimension: true
+      allow_colors: true
+      max_name_length: 32
+      # Tiempo maximo para escribir el nuevo nombre en el chat.
+      rename_timeout_seconds: 60
+      default_name: "Waypoint %n%"
+      safe_teleport: true
+      gui_rows: 6
+      slots_per_page: 45
+    lore:
+      - "&7Activa: guarda y teletransporta."
+      - "&7Slots: &a%max_slots%"
+    applied_lore:
+      - "&8Waypoint &7Nv.%level%"
+    recipe: waypoint
+
+  # ----------------------------------------------------------
+  # TIER 4
+  # ----------------------------------------------------------
+  speed:
+    name: "Speed"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Velocidad pasiva."
+    icon: SUGAR
+    tier: 4
+    max_level: 5
+    compatible_with: [BOOTS, LEGGINGS]
+    trigger: ON_INTERVAL
+    levels:
+      1: { effect_level: 1 }
+      2: { effect_level: 2 }
+      3: { effect_level: 3 }
+      4: { effect_level: 4 }
+      5: { effect_level: 5 }
+    interval_seconds: 5
+    cost: { type: FOOD, amount: 1, per: INTERVAL }
+    lore:
+      - "&7Velocidad pasiva."
+      - "&7Nivel: &a%effect_level%"
+    applied_lore:
+      - "&8Speed &7Nv.%level%"
+    recipe: speed
+
+  magic_bag:
+    name: "MagicBag"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Mochila portatil de 27 slots."
+    icon: SHULKER_SHELL
+    tier: 4
+    max_level: 1
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: { slots: 27 }
+    cost: { type: FOOD, amount: 1, per: TRIGGER }
+    lore:
+      - "&7Activa: abre una mochila de 27 slots."
+      - "&7El contenido se guarda por jugador."
+    applied_lore:
+      - "&8MagicBag"
+    recipe: magic_bag
+
+  greater_burst:
+    name: "GreaterBurst"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Empuja a los enemigos en area."
+    icon: WIND_CHARGE
+    tier: 4
+    max_level: 3
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: { radius: 5.0, force: 1.5 }
+      2: { radius: 6.5, force: 2.25 }
+      3: { radius: 8.0, force: 3.0 }
+    cost: { type: FOOD, amount: 4, per: TRIGGER }
+    lore:
+      - "&7Activa: empuja a los enemigos."
+      - "&7Radio: &a%radius% &7- Fuerza: &a%force%"
+      - "&7No rompe bloques ni hace dano."
+    applied_lore:
+      - "&8GreaterBurst &7Nv.%level%"
+    recipe: greater_burst
+
+  repair_item:
+    name: "RepairItem"
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Repara el item en la mano."
+    icon: ANVIL
+    tier: 4
+    max_level: 5
+    compatible_with: [BOOK]
+    trigger: ACTIVE
+    levels:
+      1: { repair_percent: 10, food_cost: 19 }
+      2: { repair_percent: 20, food_cost: 15 }
+      3: { repair_percent: 30, food_cost: 11 }
+      4: { repair_percent: 50, food_cost: 6 }
+      5: { repair_percent: 90, food_cost: 2 }
+    cost: { type: FOOD, amount: 19, per: TRIGGER }
+    lore:
+      - "&7Activa: repara el item en la mano."
+      - "&7Reparacion: &a%repair_percent%%%"
+    applied_lore:
+      - "&8RepairItem &7Nv.%level%"
+    recipe: repair_item
+
+  fly:
+    name: "Fly"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Vuelo pasivo con coste de comida."
+    icon: PHANTOM_MEMBRANE
+    tier: 4
+    max_level: 5
+    compatible_with: [BOOTS, CHESTPLATE]
+    trigger: ON_INTERVAL
+    levels:
+      1: { interval_seconds: 3, food_cost: 4 }
+      2: { interval_seconds: 4, food_cost: 3 }
+      3: { interval_seconds: 5, food_cost: 2 }
+      4: { interval_seconds: 6, food_cost: 2 }
+      5: { interval_seconds: 8, food_cost: 1 }
+    cost: { type: FOOD, amount: 4, per: INTERVAL }
+    lore:
+      - "&7Vuelo pasivo."
+      - "&7Coste: &a%food_cost%&7 comida cada &a%interval_seconds%s"
+    applied_lore:
+      - "&8Fly &7Nv.%level%"
+    recipe: fly
+
+  hardy:
+    name: "Hardy"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Absorcion extra que se refresca."
+    icon: GOLDEN_APPLE
+    tier: 4
+    max_level: 8
+    compatible_with: [HELMET, CHESTPLATE, LEGGINGS, BOOTS]
+    trigger: ON_INTERVAL
+    levels:
+      1: { absorption_hearts: 3 }
+      2: { absorption_hearts: 6 }
+      3: { absorption_hearts: 9 }
+      4: { absorption_hearts: 12 }
+      5: { absorption_hearts: 15 }
+      6: { absorption_hearts: 18 }
+      7: { absorption_hearts: 21 }
+      8: { absorption_hearts: 24 }
+    interval_seconds: 10
+    cost: { type: FOOD, amount: 1, per: INTERVAL }
+    lore:
+      - "&7Absorcion extra."
+      - "&7Corazones: &a%absorption_hearts%"
+      - "&7Se refresca cada &a10s&7."
+    applied_lore:
+      - "&8Hardy &7Nv.%level%"
+    recipe: hardy
+
+  evolution:
+    name: "Evolution"
+    type: PASSIVE
+    apply_to: GEAR
+    description: "Gana puntos y mejora tus stats permanentemente."
+    icon: NETHER_STAR
+    tier: 4
+    max_level: 3
+    compatible_with: [CHESTPLATE]
+    trigger: ON_KILL
+    levels:
+      1: { normal_mob_chance: 5, boss_chance: 20, normal_points: 1, boss_points: 1 }
+      2: { normal_mob_chance: 10, boss_chance: 20, normal_points: 1, boss_points: 2 }
+      3: { normal_mob_chance: 15, boss_chance: 20, normal_points: 2, boss_points: 3 }
+    cost: { type: FOOD, amount: 1, per: POINT }
+    evolution:
+      only_highest_instance: true
+      activates_only_when_equipped: true
+      boss_always_counts: true
+      caps:
+        max_health: 15
+        armor: 10
+        toughness: 6
+        attack_damage: 5
+        attack_speed: 0.6
+        movement_speed: 0.03
+        knockback_resistance: 0.5
+        luck: 5
+      increments:
+        max_health: 1
+        armor: 1
+        toughness: 1
+        attack_damage: 0.5
+        attack_speed: 0.1
+        movement_speed: 0.005
+        knockback_resistance: 0.05
+        luck: 1
+      weights:
+        max_health: 27
+        armor: 15
+        toughness: 10
+        attack_damage: 15
+        attack_speed: 8
+        movement_speed: 10
+        knockback_resistance: 10
+        luck: 5
+      base_stats:
+        max_health: 20
+        armor: 0
+        toughness: 0
+        attack_damage: 1
+        attack_speed: 4.0
+        movement_speed: 0.1
+        knockback_resistance: 0
+        luck: 0
+      action_bar: true
+      sound: ENTITY_PLAYER_LEVELUP
+    lore:
+      - "&7Gana puntos matando mobs y jefes."
+      - "&7Solo funciona mientras esta equipada."
+      - "&7Solo cuenta la instancia de mayor nivel."
+    applied_lore:
+      - "&8Evolution &7Nv.%level%"
+    recipe: evolution

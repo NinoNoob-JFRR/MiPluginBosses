@@ -1,69 +1,76 @@
 package com.tunombre.bossplugin.listener;
 
 import com.tunombre.bossplugin.Main;
-import com.tunombre.bossplugin.boss.Boss;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import com.tunombre.bossplugin.manager.BossManager;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
-
-import java.util.Random;
+import org.bukkit.event.entity.PlayerDeathEvent;
 
 /**
- * Escucha muertes de jefes para entregar botín y avisar al servidor.
+ * Danio, muerte y reinicio de los jefes.
  */
 public class BossListener implements Listener {
 
     private final Main plugin;
-    private final Random random = new Random();
 
     public BossListener(Main plugin) {
         this.plugin = plugin;
     }
 
-    @EventHandler
-    public void onBossDeath(EntityDeathEvent event) {
-        LivingEntity entity = event.getEntity();
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDamage(EntityDamageByEntityEvent event) {
+        BossManager bossManager = plugin.getBossManager();
 
-        if (!plugin.getBossManager().isBoss(entity)) {
-            return;
-        }
-
-        Boss boss = plugin.getBossManager().getActiveBoss(entity);
-        if (boss == null) {
-            return;
-        }
-
-        // Remover registro del jefe activo
-        plugin.getBossManager().removeActiveBoss(entity.getUniqueId());
-
-        // Anunciar muerte en el servidor
-        Component announce = Component.text("☠️ ")
-                .append(boss.getDisplayName())
-                .append(Component.text(" ha sido derrotado por un héroe!").color(NamedTextColor.RED));
-        plugin.getServer().broadcast(announce);
-
-        // Soltar botín del jefe
-        entity.getWorld().dropItemNaturally(entity.getLocation(),
-                new org.bukkit.inventory.ItemStack(org.bukkit.Material.EXPERIENCE_BOTTLE, 10)); // bonus de experiencia
-
-        for (org.bukkit.inventory.ItemStack drop : boss.getDrops()) {
-            if (random.nextDouble() <= boss.getDropChance()) {
-                entity.getWorld().dropItemNaturally(entity.getLocation(), drop);
+        if (event.getEntity() instanceof LivingEntity victim && bossManager.isBoss(victim)) {
+            Player damager = player(event.getDamager());
+            if (damager != null) {
+                bossManager.onBossDamaged(event, victim, damager);
             }
         }
 
-        // Limpiar drops del evento original para no duplicar (opcional)
-        event.getDrops().clear();
+        LivingEntity attacker = living(event.getDamager());
+        if (attacker != null && bossManager.isBoss(attacker)
+                && event.getEntity() instanceof LivingEntity victim) {
+            bossManager.onBossDealtDamage(attacker, victim, event.getFinalDamage());
+        }
     }
 
-    @EventHandler
-    public void onEntitySpawn(EntitySpawnEvent event) {
-        // Si quieres evitar que jefes normales aparezcan naturalmente, aquí podrías cancelarlo.
-        // Por ahora no hacemos nada.
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onDeath(EntityDeathEvent event) {
+        if (plugin.getBossManager().isBoss(event.getEntity())) {
+            plugin.getBossManager().onBossDeath(event.getEntity(), event);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onPlayerDeath(PlayerDeathEvent event) {
+        plugin.getBossManager().onPlayerDeath(event.getEntity());
+    }
+
+    private Player player(Entity damager) {
+        if (damager instanceof Player player) {
+            return player;
+        }
+        if (damager instanceof Projectile projectile && projectile.getShooter() instanceof Player shooter) {
+            return shooter;
+        }
+        return null;
+    }
+
+    private LivingEntity living(Entity source) {
+        if (source instanceof LivingEntity living) {
+            return living;
+        }
+        if (source instanceof Projectile projectile && projectile.getShooter() instanceof LivingEntity shooter) {
+            return shooter;
+        }
+        return null;
     }
 }

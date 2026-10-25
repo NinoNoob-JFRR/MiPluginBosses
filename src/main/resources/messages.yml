@@ -1,0 +1,130 @@
+# ============================================================
+# MiPluginBosses - Mensajes
+# ============================================================
+# Todos los textos visibles. Usa & para colores.
+# Placeholders entre %...%.
+# Si un mensaje se deja vacio ("") no se muestra.
+# ============================================================
+
+prefix: "&8[&cJefes&8]&r "
+
+# ------------------------------------------------------------
+# General
+# ------------------------------------------------------------
+general:
+  no-permission: "&cNo tienes permiso para usar esto."
+  only-players: "&cSolo los jugadores pueden usar este comando."
+  unknown-command: "&cComando desconocido. Usa &e/boss ayuda&c."
+  player-not-found: "&cNo se encontro al jugador &e%player%&c."
+  invalid-number: "&cNumero invalido: &e%value%&c."
+  reloaded: "&aConfiguracion recargada correctamente."
+  world-not-found: "&cMundo no encontrado: &e%world%&c."
+  config-error: "&cError de configuracion: &e%error%"
+  suggest-command: "&7Haz clic para usar: &e%command%"
+  menu-close: "&cCerrar"
+  prev-page: "&7Pagina anterior"
+  next-page: "&7Pagina siguiente"
+  page: "&7Pagina &e%page%&7/&e%pages%"
+
+# ------------------------------------------------------------
+# Jefes
+# ------------------------------------------------------------
+boss:
+  summoned: "&aHas invocado a %tier_color%%boss%&a."
+  announced: "%tier_color%%boss% &7(T%tier%) &aha aparecido. &e%player% &7lo invoco."
+  killed: "&aHas derrotado a %tier_color%%boss%&a."
+  killed-broadcast: "%tier_color%%boss% &7ha sido derrotado por &e%player%&7."
+  despawned: "&7%tier_color%%boss% &7ha desaparecido."
+  timer-warning: "&c%tier_color%%boss% &cdesaparecera en &e%seconds%s&c."
+  reset-on-death: "&cHas muerto. &e%boss% &cvuelve a estar al 100%."
+  no-players: "&7No hay jugadores cerca. &e%boss% &7desaparecera pronto."
+  not-found: "&cNo existe un jefe con id &e%id%&c."
+  already-active: "&cYa hay un jefe activo con ese id."
+  protected-area: "&cNo puedes hacer eso durante la pelea."
+  minion-name: "&cEsbirro de %boss%"
+
+# ------------------------------------------------------------
+# Huevos
+# ------------------------------------------------------------
+egg:
+  spawned: "&dUn huevo de jefe ha aparecido en el mundo."
+  spawned-coords: "&dHuevo de jefe en &e%x%&7, &e%y%&7, &e%z% &7(%world%)."
+  despawned: "&7Un huevo de jefe ha desaparecido sin abrirse."
+  opened: "&dHas abierto el huevo. &e%boss% &7(T%tier%) ha aparecido."
+  protected: "&cEste huevo no puede romperse. Solo se abre con clic."
+  none: "&7No hay ningun huevo de jefe en este mundo."
+  max-reached: "&7Ya hay el maximo de huevos activos (&e%max%&7)."
+  compass-given: "&aHas recibido la &bBrujula de Rastreo&a."
+  compass-received: "&aHas recibido una &bBrujula de Rastreo&a."
+  compass-no-eggs: "&7La brujula no detecta ningun huevo en este mundo."
+  compass-updated: "&bLa brujula apunta al huevo mas cercano."
+
+# ------------------------------------------------------------
+# Progresion
+# ------------------------------------------------------------
+progression:
+  unlocked: "&aHas desbloqueado el tier &e%tier%&a."
+  already-unlocked: "&7El tier &e%tier% &7ya estaba desbloqueado."
+  reset: "&aProgreso reseteado para &e%player%&a."
+  reset-tier: "&aTier &e%tier% &areseteado para &e%player%&a."
+  header: "&8&m------&r &eProgreso de %player% &8&m------"
+  entry: "&7Tier %tier%: &e%killed%&7/&e%total% &7jefes"
+  entry-done: "&aTier %tier%: completado"
+  entry-locked: "&8Tier %tier%: bloqueado"
+  max-tier: "&7Tier maximo: &e%tier%"
+
+# ------------------------------------------------------------
+# Esencias y habilidades
+# ------------------------------------------------------------
+essence:
+  given: "&aHas dado &e%amount% &6Esencia(s) Legendaria(s)&a a &e%player%&a."
+  received: "&aHas recibido &e%amount% &6Esencia(s) Legendaria(s)&a."
+  applied: "&aHas aplicado &e%ability% &aNv.%level%&a."
+  max-level: "&7%ability% ya esta al nivel maximo."
+  wrong-item: "&c%ability% no se puede aplicar a ese item."
+  book-required: "&cLas habilidades activas necesitan un libro."
+  cannot-apply: "&cNo puedes aplicar esa habilidad."
+  no-slot: "&cNo queda espacio para mas habilidades."
+  inventory-full: "&cTu inventario esta lleno."
+
+# ------------------------------------------------------------
+# Waypoints y MagicBag
+# ------------------------------------------------------------
+waypoint:
+  title: "&8Waypoints"
+  saved: "&aWaypoint guardado: &e%name%&a."
+  full: "&cNo quedan slots de waypoint."
+  deleted: "&aWaypoint eliminado."
+  teleported: "&aTeletransportado a &e%name%&a."
+  rename-prompt: "&eEscribe el nuevo nombre en el chat, o &7cancelar&e."
+  rename-cancelled: "&7Renombrado cancelado."
+  renamed: "&aWaypoint renombrado a &e%name%&a."
+  invalid: "&cNombre invalido."
+bag:
+  title: "&8MagicBag"
+
+# ------------------------------------------------------------
+# Estadisticas
+# ------------------------------------------------------------
+stats:
+  header: "&8&m------&r &dEstadisticas de %player% &8&m------"
+  gained-point: "&a+%amount% punto(s) de Evolution&7 (&e%stat%&7)"
+  stat-maxed: "&7%stat% esta al maximo."
+  evolution-equipped: "&aEquipada"
+  evolution-not-equipped: "&cNo equipada"
+  refresh: "&aEstadisticas actualizadas."
+
+# ------------------------------------------------------------
+# Administracion
+# ------------------------------------------------------------
+admin:
+  egg-spawned: "&aHuevo generado en &e%x%&7, &e%y%&7, &e%z%&7."
+  boss-spawned: "&aJefe &e%boss% &ainvocado en &e%x%&7, &e%y%&7, &e%z%&7."
+  tier-unlocked: "&aTier &e%tier% &adesbloqueado para &e%player%&a."
+  progress-reset: "&aProgreso de &e%player% &areseteado."
+  essence-given: "&aEsencia entregada a &e%player%&a."
+  compass-given: "&aBrujula entregada a &e%player%&a."
+  validation-ok: "&aTodos los archivos son validos."
+  validation-errors: "&cSe encontraron &e%count% &cerror(es). Revisa la consola."
+  reloading: "&7Recargando configuracion..."
+  reloaded: "&aRecarga completada."

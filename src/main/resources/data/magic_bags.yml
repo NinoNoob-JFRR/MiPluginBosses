@@ -1,0 +1,8 @@
+# ============================================================
+# MiPluginBosses - Datos de MagicBag
+# ============================================================
+# No editar manualmente salvo que sepas lo que haces.
+# Cada jugador guarda su inventario serializado en Base64.
+# ============================================================
+
+players: {}

@@ -1,0 +1,126 @@
+# ============================================================
+# MiPluginBosses - Recetas de crafteo
+# ============================================================
+# Patron comun de las 27 esencias de habilidad:
+#
+#   B A B
+#   A E A
+#   B A B
+#
+# E = Esencia Legendaria (centro)
+# A = 4 unidades del material principal
+# B = 4 unidades del material secundario
+#
+# Solo mesa de crafteo. Una receta por habilidad.
+# ============================================================
+
+recipes:
+  pattern:
+    - "BAB"
+    - "AEA"
+    - "BAB"
+
+  abilities:
+    poison:
+      A: SPIDER_EYE
+      B: BROWN_MUSHROOM
+    backstab:
+      A: FLINT
+      B: IRON_INGOT
+    blinding:
+      A: INK_SAC
+      B: GLOWSTONE_DUST
+    call_lighting:
+      A: COPPER_INGOT
+      B: GUNPOWDER
+    confuse:
+      A: FERMENTED_SPIDER_EYE
+      B: RED_MUSHROOM
+    disarm:
+      A: TRIPWIRE_HOOK
+      B: IRON_INGOT
+    slow:
+      A: COBWEB
+      B: SLIME_BALL
+    vampiric_regeneration:
+      A: GHAST_TEAR
+      B: GLOWSTONE_DUST
+    weaken:
+      A: FERMENTED_SPIDER_EYE
+      B: GRAY_DYE
+    fertilize:
+      A: BONE_MEAL
+      B: WHEAT_SEEDS
+    craft_item:
+      A: CRAFTING_TABLE
+      B: OAK_PLANKS
+    vein_miner:
+      A: IRON_PICKAXE
+      B: REDSTONE_BLOCK
+    tree_feller:
+      A: IRON_AXE
+      B: OAK_LOG
+    magnet:
+      A: IRON_BLOCK
+      B: COMPASS
+    ender_bag:
+      A: ENDER_PEARL
+      B: LEATHER
+    durability:
+      A: DIAMOND
+      B: OBSIDIAN
+    regeneration:
+      A: GOLDEN_APPLE
+      B: GHAST_TEAR
+    bleed:
+      A: DIAMOND
+      B: REDSTONE_BLOCK
+    armor_piercer:
+      A: DIAMOND
+      B: FLINT
+    waypoint:
+      A: ENDER_PEARL
+      B: COMPASS
+    speed:
+      A: SUGAR
+      B: GOLDEN_CARROT
+    magic_bag:
+      A: SHULKER_SHELL
+      B: LEATHER
+    greater_burst:
+      A: WIND_CHARGE
+      B: GUNPOWDER
+    repair_item:
+      A: IRON_BLOCK
+      B: DIAMOND
+    fly:
+      A: PHANTOM_MEMBRANE
+      B: FEATHER
+    hardy:
+      A: GOLDEN_APPLE
+      B: IRON_BLOCK
+    evolution:
+      A: DIAMOND
+      B: EMERALD_BLOCK
+
+  # Receta de la brujula de rastreo.
+  #   . H .
+  #   E C O
+  #   . D .
+  tracking_compass:
+    pattern:
+      - " H "
+      - "ECO"
+      - " D "
+    ingredients:
+      H: IRON_INGOT
+      E: EMERALD
+      C: COMPASS
+      O: GOLD_INGOT
+      D: DIAMOND
+
+  # Ajustes del menu de recetas.
+  menu:
+    show-all: true
+    show-locked: true
+    show-ingredients: true

@@ -1,0 +1,52 @@
+# ============================================================
+# MiPluginBosses - Progresion
+# ============================================================
+# Progreso individual por jugador.
+# Se desbloquea el siguiente tier al matar a los 2 jefes del tier actual.
+# ============================================================
+
+progression:
+  mode: individual
+  max-tier: 10
+
+  unlock:
+    require-all-bosses-of-tier: true
+
+  # Participacion minima para recibir credito por un jefe.
+  credit:
+    # Al menos 1 punto de dano.
+    min-damage: 1
+    # Y estar a esta distancia o menos cuando muere.
+    max-distance: 30
+    # Las muertes por ambiente/otros mobs tambien cuentan
+    # si el jugador cumple la participacion minima.
+    environmental-deaths-count: true
+
+  # Temporizador de abandono del jefe.
+  boss-timer:
+    # Si no hay jugadores cerca durante X segundos, se avisa y desaparece.
+    no-players-seconds: 60
+    # Radio para considerar que hay jugadores en la pelea.
+    player-radius: 40
+    warnings:
+      - 60
+      - 10
+
+  # Al morir un jugador durante la pelea.
+  reset-on-player-death:
+    boss-health: true
+    boss-position: true
+    boss-cooldowns: true
+    minions: true
+    timer: true
+
+  loot:
+    # El loot del jefe es libre para todos.
+    mode: free-for-all
+    # Se eliminan los drops vanilla del jefe.
+    clear-vanilla-drops: true
+
+  persistence:
+    progress-file: "data/progress.yml"
+    stats-file: "data/stats.yml"
+    waypoints-file: "data/waypoints.yml"

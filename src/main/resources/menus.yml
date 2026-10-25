@@ -1,0 +1,381 @@
+# ============================================================
+# MiPluginBosses - Menus
+# ============================================================
+# Menu de jugador y menu de admin separados.
+# Todos los slots son configurables.
+# Acciones: OPEN_MENU, RUN_COMMAND, SUGGEST_COMMAND, CLOSE
+# ============================================================
+
+menus:
+
+  # Item de relleno.
+  fill:
+    material: BLACK_STAINED_GLASS_PANE
+    name: " "
+
+  # ----------------------------------------------------------
+  # Menu del jugador
+  # ----------------------------------------------------------
+  main:
+    title: "&8Menu de Jefes"
+    rows: 6
+    items:
+      recipes:
+        slot: 10
+        material: CRAFTING_TABLE
+        name: "&eRecetas"
+        lore:
+          - "&7Consulta todas las recetas"
+          - "&7de Esencias de Habilidad."
+        action: OPEN_MENU
+        menu: recipes
+      abilities:
+        slot: 12
+        material: NETHER_STAR
+        name: "&bHabilidades"
+        lore:
+          - "&7Consulta las 27 habilidades,"
+          - "&7sus niveles y sus costes."
+        action: OPEN_MENU
+        menu: abilities
+      bosses:
+        slot: 14
+        material: IRON_SWORD
+        name: "&cJefes"
+        lore:
+          - "&7Consulta los 20 jefes,"
+          - "&7sus tiers y habilidades."
+        action: OPEN_MENU
+        menu: bosses
+      progress:
+        slot: 28
+        material: EXPERIENCE_BOTTLE
+        name: "&aMi progreso"
+        lore:
+          - "&7Tu tier maximo desbloqueado"
+          - "&7y los jefes que has derrotado."
+        action: OPEN_MENU
+        menu: progress
+      stats:
+        slot: 30
+        material: PLAYER_HEAD
+        name: "&dMis estadisticas"
+        lore:
+          - "&7Tus stats base, equipo,"
+          - "&7Evolution y totales."
+        action: OPEN_MENU
+        menu: stats
+      help:
+        slot: 32
+        material: BOOK
+        name: "&fAyuda"
+        lore:
+          - "&7Comandos y guia rapida."
+        action: OPEN_MENU
+        menu: help
+      close:
+        slot: 49
+        material: BARRIER
+        name: "&cCerrar"
+        action: CLOSE
+
+  # ----------------------------------------------------------
+  # Menu del admin
+  # ----------------------------------------------------------
+  admin:
+    title: "&8Menu de Administracion"
+    rows: 6
+    items:
+      eggs:
+        slot: 10
+        material: DRAGON_EGG
+        name: "&5Huevos"
+        lore:
+          - "&7Genera un huevo de jefe."
+          - "&8/boss huevo [tier] [cantidad]"
+        action: SUGGEST_COMMAND
+        command: "/boss huevo "
+      compass:
+        slot: 11
+        material: COMPASS
+        name: "&bBrujula de Rastreo"
+        lore:
+          - "&7Entrega la brujula a un jugador."
+          - "&8/boss brujula [jugador]"
+        action: SUGGEST_COMMAND
+        command: "/boss brujula "
+      give_essence:
+        slot: 12
+        material: NETHER_STAR
+        name: "&6Dar esencia"
+        lore:
+          - "&7Entrega una Esencia Legendaria."
+          - "&8/boss dar <jugador> <esencia> [cantidad]"
+        action: SUGGEST_COMMAND
+        command: "/boss dar "
+      unlock:
+        slot: 13
+        material: EXPERIENCE_BOTTLE
+        name: "&aDesbloquear tier"
+        lore:
+          - "&7Desbloquea un tier a un jugador."
+          - "&8/boss desbloquear <jugador> <tier>"
+        action: SUGGEST_COMMAND
+        command: "/boss desbloquear "
+      reset:
+        slot: 14
+        material: BARRIER
+        name: "&cResetear progreso"
+        lore:
+          - "&7Resetea el progreso de un jugador."
+          - "&8/boss reset <jugador> [tier|all]"
+        action: SUGGEST_COMMAND
+        command: "/boss reset "
+      spawn_boss:
+        slot: 15
+        material: ZOMBIE_HEAD
+        name: "&4Invocar jefe"
+        lore:
+          - "&7Invoca un jefe por su id."
+          - "&8/boss jefe <id>"
+        action: SUGGEST_COMMAND
+        command: "/boss jefe "
+      reload:
+        slot: 16
+        material: REDSTONE
+        name: "&eRecargar"
+        lore:
+          - "&7Recarga todos los YAML."
+          - "&8/boss recargar"
+        action: RUN_COMMAND
+        command: "/boss recargar"
+      validate:
+        slot: 17
+        material: WRITABLE_BOOK
+        name: "&fValidar configs"
+        lore:
+          - "&7Comprueba errores en los YAML."
+          - "&8/boss validar"
+        action: RUN_COMMAND
+        command: "/boss validar"
+      back:
+        slot: 49
+        material: ARROW
+        name: "&7Volver"
+        action: OPEN_MENU
+        menu: main
+
+  # ----------------------------------------------------------
+  # Submenu: recetas
+  # ----------------------------------------------------------
+  recipes:
+    title: "&8Recetas"
+    rows: 6
+    paginated: true
+    item:
+      material: NETHER_STAR
+      name: "&e%ability_name%"
+      lore:
+        - "&7Tier: &e%tier%"
+        - "&7Nivel maximo: &e%max_level%"
+        - ""
+        - "&7Receta:"
+        - "&8%recipe%"
+        - ""
+        - "&eClick para ver el detalle"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Submenu: habilidades
+  # ----------------------------------------------------------
+  abilities:
+    title: "&8Habilidades"
+    rows: 6
+    paginated: true
+    item:
+      material: NETHER_STAR
+      name: "&b%ability_name%"
+      lore:
+        - "&7%ability_description%"
+        - ""
+        - "&7Tipo: &e%type%"
+        - "&7Tier: &e%tier%"
+        - "&7Nivel maximo: &e%max_level%"
+        - "&7Coste: &e%cost%"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Submenu: jefes (bestiario)
+  # ----------------------------------------------------------
+  bosses:
+    title: "&8Jefes"
+    rows: 6
+    paginated: true
+    item:
+      material: ZOMBIE_HEAD
+      name: "%tier_color%%boss_name%"
+      lore:
+        - "&7Tier: %tier_color%%tier_name%"
+        - "&7Arquetipo: &e%archetype%"
+        - ""
+        - "&7Habilidades:"
+        - "&8%abilities%"
+        - ""
+        - "&7Vida: &c%health% &7- Dano: &c%damage%"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Submenu: progreso
+  # ----------------------------------------------------------
+  progress:
+    title: "&8Mi progreso"
+    rows: 6
+    items:
+      tier:
+        slot: 13
+        material: EXPERIENCE_BOTTLE
+        name: "&aTier maximo: &e%tier%"
+        lore:
+          - "&7Jefes derrotados: &e%killed%&7/&e%total%"
+          - "&7Progreso del tier: &e%tier_progress%"
+      bosses:
+        slot: 22
+        material: IRON_SWORD
+        name: "&cJefes derrotados"
+        lore:
+          - "%boss_list%"
+      close:
+        slot: 49
+        material: BARRIER
+        name: "&cCerrar"
+        action: CLOSE
+
+  # ----------------------------------------------------------
+  # Submenu: estadisticas
+  # ----------------------------------------------------------
+  stats:
+    title: "&8Mis estadisticas"
+    rows: 6
+    stats:
+      health:
+        slot: 10
+        material: GOLDEN_APPLE
+        name: "&cVida maxima"
+        stat: max_health
+        lore: &stat_lore
+          - "&7Base: &f%base%"
+          - "&7Equipo: &f%equipment%"
+          - "&7Evolution: &a+%evolution%"
+          - "&8----------------"
+          - "&7Total: &e%total%"
+          - "&7Puntos: &e%points%&7/&e%max_points%"
+          - "&7Mejora por punto: &a+%increment%"
+      armor:
+        slot: 11
+        material: IRON_CHESTPLATE
+        name: "&7Armadura"
+        stat: armor
+        lore: *stat_lore
+      toughness:
+        slot: 12
+        material: DIAMOND_CHESTPLATE
+        name: "&7Dureza"
+        stat: toughness
+        lore: *stat_lore
+      attack_damage:
+        slot: 13
+        material: IRON_SWORD
+        name: "&cDano de ataque"
+        stat: attack_damage
+        lore: *stat_lore
+      attack_speed:
+        slot: 14
+        material: FEATHER
+        name: "&eVelocidad de ataque"
+        stat: attack_speed
+        lore: *stat_lore
+      movement_speed:
+        slot: 15
+        material: SUGAR
+        name: "&bVelocidad"
+        stat: movement_speed
+        lore: *stat_lore
+      knockback_resistance:
+        slot: 16
+        material: SHIELD
+        name: "&7Resistencia al empuje"
+        stat: knockback_resistance
+        lore: *stat_lore
+      luck:
+        slot: 17
+        material: RABBIT_FOOT
+        name: "&aLuck"
+        stat: luck
+        lore: *stat_lore
+    player_head:
+      slot: 4
+      material: PLAYER_HEAD
+      name: "&e%player%"
+      lore:
+        - "&7Tier maximo: &e%tier%"
+        - "&7Puntos de Evolution: &e%points%"
+    evolution:
+      slot: 22
+      material: NETHER_STAR
+      name: "&5Evolution"
+      lore:
+        - "&7Nivel: &e%evolution_level%"
+        - "&7Equipada: %evolution_equipped%"
+        - "&7Puntos: &e%points%&7/&e%max_points%"
+        - "&7Stats al maximo: &e%maxed%"
+        - ""
+        - "%evolution_progress%"
+    refresh:
+      slot: 48
+      material: SUNFLOWER
+      name: "&aRefrescar"
+      action: REFRESH
+    close:
+      slot: 50
+      material: BARRIER
+      name: "&cCerrar"
+      action: CLOSE
+
+  # ----------------------------------------------------------
+  # Submenu: ayuda
+  # ----------------------------------------------------------
+  help:
+    title: "&8Ayuda"
+    rows: 6
+    items:
+      commands:
+        slot: 13
+        material: BOOK
+        name: "&eComandos de jugador"
+        lore:
+          - "&8/boss menu &7- Abre este menu"
+          - "&8/boss stats &7- Tus estadisticas"
+          - "&8/boss progreso &7- Tu progreso"
+          - "&8/boss ayuda &7- Esta ayuda"
+      progression:
+        slot: 22
+        material: EXPERIENCE_BOTTLE
+        name: "&aComo progresar"
+        lore:
+          - "&7Abre huevos de jefe por el mundo."
+          - "&7Derrota a los 2 jefes de tu tier"
+          - "&7para desbloquear el siguiente."
+      close:
+        slot: 49
+        material: BARRIER
+        name: "&cCerrar"
+        action: CLOSE

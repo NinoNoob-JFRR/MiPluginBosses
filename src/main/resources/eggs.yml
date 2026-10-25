@@ -1,0 +1,74 @@
+# ============================================================
+# MiPluginBosses - Huevos de jefe
+# ============================================================
+# Los huevos aparecen de forma natural o por comando.
+# Son indestructibles: solo se abren con clic izquierdo o derecho.
+# Al abrirse desaparecen el huevo y el pedestal, y aparece el jefe.
+# ============================================================
+
+eggs:
+  enabled: true
+
+  # Maximo de huevos activos al mismo tiempo (ajustable).
+  max-active: 10
+
+  block: DRAGON_EGG
+  pedestal: BEDROCK
+
+  # Mundos donde pueden aparecer.
+  worlds:
+    - world
+
+  spawn:
+    # Aparicion automatica cada X minutos si hay espacio.
+    automatic: true
+    interval-minutes: 10
+
+    # Radio alrededor del spawn del mundo.
+    radius: 750
+
+    # Distancia minima entre dos huevos.
+    min-distance-between-eggs: 100
+
+    # Solo en superficie, nunca en liquido ni en cuevas.
+    require-surface: true
+    avoid-liquid: true
+
+  despawn:
+    # Si nadie lo abre en X minutos, desaparece.
+    minutes: 45
+
+  open:
+    clicks:
+      - LEFT
+      - RIGHT
+    consume-block: true
+    # Anuncia jugador, jefe y tier al abrirse.
+    announcement: true
+
+  protection:
+    # No se puede romper, explotar, mover con piston ni drenar con hopper.
+    indestructible: true
+
+  # Tier del jefe al abrir el huevo.
+  # Solo se tienen en cuenta los tiers desbloqueados por el jugador.
+  tier-weights:
+    # linear-descending: el tier mas alto tiene mas peso.
+    # Ejemplo con maximo T5: 5,4,3,2,1 -> 33%,27%,20%,13%,7%
+    mode: linear-descending
+    # Si quieres pesos fijos, usa mode: custom y rellena esto.
+    custom: {}
+
+  particles:
+    enabled: true
+    type: END_ROD
+    radius: 1.0
+
+  compass:
+    points-to-nearest: true
+    same-world: true
+    # -1 = sin limite de distancia.
+    max-distance: -1
+
+  persistence:
+    file: "data/eggs.yml"

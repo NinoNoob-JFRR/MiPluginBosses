@@ -1,16 +1,63 @@
-# Configuración de MiPluginBosses para Minecraft 26.3
+# ============================================================
+# MiPluginBosses - Configuracion general
+# ============================================================
+# Este archivo solo contiene ajustes globales.
+# Cada sistema tiene su propio archivo:
+#   tiers.yml, bosses.yml, boss_abilities.yml, essence_abilities.yml,
+#   drops.yml, recipes.yml, eggs.yml, progression.yml, items.yml,
+#   menus.yml, mobs.yml, loot.yml, messages.yml
+# ============================================================
+
+config-version: 1
+
+# Idioma de los mensajes (de momento solo "es").
+language: es
+
+# Muestra informacion extra en consola. No usar en produccion.
+debug: false
+
+# ------------------------------------------------------------
+# Migracion automatica de configuraciones
+# ------------------------------------------------------------
+# Al actualizar el plugin, anade las claves nuevas a tus YAML
+# sin borrar lo que ya tengas configurado.
+migration:
+  enabled: true
+  # Crea una copia de seguridad antes de migrar.
+  backup: true
+
+# ------------------------------------------------------------
+# Registro de eventos
+# ------------------------------------------------------------
+logging:
+  kills: true
+  errors: true
+  admin-actions: true
+
+# ------------------------------------------------------------
+# Rendimiento
+# ------------------------------------------------------------
+performance:
+  # Cada cuantos ticks se actualiza la barra de jefe.
+  bossbar-interval-ticks: 5
+  # Cada cuantos ticks se refrescan los menus de estadisticas abiertos.
+  stats-menu-interval-ticks: 20
+
+# ------------------------------------------------------------
+# Compatibilidad con versiones anteriores
+# ------------------------------------------------------------
+# Claves antiguas conservadas para no romper instalaciones previas.
+default-drop-chance: 0.5
+bossbar-max-distance: 100
+
+# Los mensajes completos viven en messages.yml.
+# Este bloque se mantiene como respaldo para versiones antiguas.
 messages:
   prefix: "&8[&cJefes&8]&r "
-  boss-summoned: "&aSe ha invocado a &e{boss}&a en tu ubicación."
+  boss-summoned: "&aSe ha invocado a &e{boss}&a en tu ubicacion."
   boss-list-header: "&e--- Jefes disponibles ---"
   boss-list-item: "&7- &f{key} &8({vida} vida, {danio} danio)"
   boss-not-found: "&cEse jefe no existe. Usa /boss listar para ver la lista."
   no-permission: "&cNo tienes permiso para usar este comando."
   only-players: "&cSolo los jugadores pueden usar este comando."
-  reloaded: "&aConfiguración recargada."
-
-# Probabilidad base de drop (0.0 a 1.0) si no se especifica en el jefe
-default-drop-chance: 0.5
-
-# Distancia máxima a la que se muestra la barra de jefe
-bossbar-max-distance: 100
+  reloaded: "&aConfiguracion recargada."

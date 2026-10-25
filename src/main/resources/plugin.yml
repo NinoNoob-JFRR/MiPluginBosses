@@ -2,19 +2,44 @@ name: MiPluginBosses
 version: 1.0
 main: com.tunombre.bossplugin.Main
 api-version: '1.21'
-description: Plugin de jefes personalizados para Minecraft 26.3 - Wilderness Bound
+description: Plugin de jefes, esencias, mob tiers y loot custom para Minecraft 26.3
 author: TuNombre
 
 commands:
   boss:
-    description: Comando principal para invocar jefes
-    usage: /boss <invocar|listar|recargar> [tipo]
-    permission: bossplugin.use
+    description: Comando principal de MiPluginBosses
+    aliases: [jefes]
+    usage: |
+      /boss menu - Menu del jugador
+      /boss stats - Tus estadisticas
+      /boss progreso - Tu progreso
+      /boss ayuda - Ayuda
+      /boss adminmenu - Menu de administracion
+      /boss huevo [tier] [cantidad] - Genera un huevo
+      /boss brujula [jugador] - Entrega la brujula
+      /boss dar <jugador> <esencia> [cantidad] - Entrega esencias
+      /boss desbloquear <jugador> <tier> - Desbloquea un tier
+      /boss reset <jugador> [tier|all] - Resetea progreso
+      /boss jefe <id> - Invoca un jefe
+      /boss recargar - Recarga los YAML
+      /boss validar - Valida los YAML
+    permission: mibosses.user
 
 permissions:
-  bossplugin.use:
-    description: Permite usar el comando /boss
+  mibosses.user:
+    description: Acceso a los comandos y menus de jugador
+    default: true
+  mibosses.admin:
+    description: Acceso total a comandos y menus de administracion
     default: op
+    children:
+      mibosses.user: true
+
+  # Nodos legacy: se mantienen para que la version anterior
+  # del jar siga funcionando hasta completar la migracion.
+  bossplugin.use:
+    description: (legacy) Acceso al comando /boss
+    default: true
   bossplugin.admin:
-    description: Permite recargar el plugin
+    description: (legacy) Acceso de administracion
     default: op

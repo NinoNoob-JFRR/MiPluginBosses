@@ -1,0 +1,50 @@
+# ============================================================
+# MiPluginBosses - Items personalizados
+# ============================================================
+# Plantillas de los items que crea el plugin.
+# Los nombres y lore admiten codigos de color con &.
+# ============================================================
+
+items:
+  # Drop directo de los jefes.
+  legendary_essence:
+    material: NETHER_STAR
+    name: "&6Esencia Legendaria"
+    lore:
+      - "&7El nucleo de un jefe derrotado."
+      - "&7Se usa para crear Esencias de Habilidad."
+    glow: true
+    stackable: true
+    custom-model-data: 0
+
+  # Item resultante de craftear una habilidad.
+  # El nombre y el lore se rellenan con los datos de la habilidad.
+  ability_essence:
+    material: NETHER_STAR
+    name: "%ability_name%"
+    lore:
+      - "%ability_lore%"
+      - ""
+      - "&8Tier %ability_tier% &8- &7Nivel maximo %ability_max_level%"
+    glow: true
+    stackable: true
+    custom-model-data: 0
+
+  # Libro que contiene una habilidad activa.
+  # El nombre y el lore se rellenan con los datos de la habilidad.
+  ability_book:
+    name: "&b%ability_name%"
+    usage: "&8Haz clic derecho en el aire para usar."
+    glow: true
+
+  # Brujula que apunta al huevo de jefe mas cercano.
+  tracking_compass:
+    material: COMPASS
+    name: "&bBrujula de Rastreo"
+    lore:
+      - "&7Apunta al huevo de jefe mas cercano."
+      - "&7Usos infinitos."
+      - "&8Solo funciona en el mismo mundo."
+    glow: true
+    stackable: false
+    custom-model-data: 1

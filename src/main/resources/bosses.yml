@@ -1,0 +1,295 @@
+# ============================================================
+# MiPluginBosses - Los 20 jefes
+# ============================================================
+# 10 tiers x 2 jefes.
+# stats.speed es un bono (0.10 = +10%).
+# Las habilidades se definen en boss_abilities.yml.
+# Los drops base se definen en drops.yml; aqui solo overrides.
+# ============================================================
+
+bosses:
+
+  # ------------------------- TIER 1 -------------------------
+  brute_de_piedra:
+    name: "Bruto de Piedra"
+    tier: 1
+    archetype: BRUTE
+    entity: ZOMBIE
+    stats: { health: 200, damage: 6, armor: 0, toughness: 0, speed: 0.00 }
+    equipment:
+      main_hand: IRON_AXE
+      helmet: LEATHER_HELMET
+      chestplate: LEATHER_CHESTPLATE
+      leggings: LEATHER_LEGGINGS
+      boots: LEATHER_BOOTS
+    abilities: [ground_slam, cleave, charge]
+    xp: 100
+
+  acechador_de_las_sombras:
+    name: "Acechador de las Sombras"
+    tier: 1
+    archetype: STALKER
+    entity: SPIDER
+    stats: { health: 200, damage: 6, armor: 0, toughness: 0, speed: 0.00 }
+    equipment:
+      main_hand: IRON_SWORD
+      helmet: LEATHER_HELMET
+      chestplate: LEATHER_CHESTPLATE
+      leggings: LEATHER_LEGGINGS
+      boots: LEATHER_BOOTS
+    abilities: [shadow_step, poison_cloud, fear]
+    xp: 100
+
+  # ------------------------- TIER 2 -------------------------
+  arquero_del_bosque:
+    name: "Arquero del Bosque"
+    tier: 2
+    archetype: RANGER
+    entity: SKELETON
+    stats: { health: 320, damage: 7, armor: 1, toughness: 0, speed: 0.02 }
+    equipment:
+      main_hand: BOW
+      helmet: CHAINMAIL_HELMET
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+    abilities: [arrow_volley, web_trap, homing_shot]
+    xp: 150
+
+  brujo_aprendiz:
+    name: "Brujo Aprendiz"
+    tier: 2
+    archetype: SUMMONER
+    entity: EVOKER
+    stats: { health: 320, damage: 7, armor: 1, toughness: 0, speed: 0.02 }
+    equipment:
+      main_hand: STICK
+      helmet: LEATHER_HELMET
+      chestplate: LEATHER_CHESTPLATE
+      leggings: LEATHER_LEGGINGS
+      boots: LEATHER_BOOTS
+    abilities: [summon_minions, poison_cloud, heal]
+    xp: 150
+
+  # ------------------------- TIER 3 -------------------------
+  berserker_sangriento:
+    name: "Berserker Sangriento"
+    tier: 3
+    archetype: BERSERKER
+    entity: VINDICATOR
+    stats: { health: 480, damage: 9, armor: 1, toughness: 1, speed: 0.04 }
+    equipment:
+      main_hand: IRON_AXE
+      helmet: IRON_HELMET
+      chestplate: IRON_CHESTPLATE
+      leggings: IRON_LEGGINGS
+      boots: IRON_BOOTS
+    abilities: [frenzy, blood_lust, cleave]
+    xp: 200
+
+  coloso_de_arcilla:
+    name: "Coloso de Arcilla"
+    tier: 3
+    archetype: COLOSSUS
+    entity: IRON_GOLEM
+    stats: { health: 480, damage: 9, armor: 1, toughness: 1, speed: 0.04 }
+    equipment: {}
+    abilities: [shockwave, pull, ground_slam]
+    xp: 200
+
+  # ------------------------- TIER 4 -------------------------
+  senor_de_la_arena:
+    name: "Senor de la Arena"
+    tier: 4
+    archetype: BRUTE
+    entity: HUSK
+    stats: { health: 700, damage: 11, armor: 2, toughness: 1, speed: 0.06 }
+    equipment:
+      main_hand: IRON_SWORD
+      helmet: GOLDEN_HELMET
+      chestplate: GOLDEN_CHESTPLATE
+      leggings: GOLDEN_LEGGINGS
+      boots: GOLDEN_BOOTS
+    abilities: [charge, ground_slam, earthquake]
+    xp: 250
+
+  nigromante:
+    name: "Nigromante"
+    tier: 4
+    archetype: SUMMONER
+    entity: WITHER_SKELETON
+    stats: { health: 700, damage: 11, armor: 2, toughness: 1, speed: 0.06 }
+    equipment:
+      main_hand: STICK
+      helmet: CHAINMAIL_HELMET
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+    abilities: [summon_minions, summon_elite, meteor_rain]
+    xp: 250
+
+  # ------------------------- TIER 5 -------------------------
+  bestia_del_abismo:
+    name: "Bestia del Abismo"
+    tier: 5
+    archetype: STALKER
+    entity: RAVAGER
+    stats: { health: 1000, damage: 13, armor: 2, toughness: 2, speed: 0.08 }
+    equipment: {}
+    abilities: [shadow_step, life_drain, fear, poison_cloud]
+    xp: 300
+
+  cazador_de_almas:
+    name: "Cazador de Almas"
+    tier: 5
+    archetype: RANGER
+    entity: PILLAGER
+    stats: { health: 1000, damage: 13, armor: 2, toughness: 2, speed: 0.08 }
+    equipment:
+      main_hand: CROSSBOW
+      helmet: CHAINMAIL_HELMET
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+    abilities: [arrow_volley, homing_shot, web_trap, lightning]
+    xp: 300
+
+  # ------------------------- TIER 6 -------------------------
+  titan_de_obsidiana:
+    name: "Titan de Obsidiana"
+    tier: 6
+    archetype: COLOSSUS
+    entity: IRON_GOLEM
+    stats: { health: 1400, damage: 16, armor: 3, toughness: 2, speed: 0.10 }
+    equipment: {}
+    abilities: [shockwave, wither_aura, pull, ground_slam]
+    xp: 350
+
+  campeon_del_inframundo:
+    name: "Campeon del Inframundo"
+    tier: 6
+    archetype: BERSERKER
+    entity: PIGLIN_BRUTE
+    stats: { health: 1400, damage: 16, armor: 3, toughness: 2, speed: 0.10 }
+    equipment:
+      main_hand: GOLDEN_AXE
+      helmet: GOLDEN_HELMET
+      chestplate: GOLDEN_CHESTPLATE
+      leggings: GOLDEN_LEGGINGS
+      boots: GOLDEN_BOOTS
+    abilities: [frenzy, enrage, blood_lust, cleave]
+    xp: 350
+
+  # ------------------------- TIER 7 -------------------------
+  hechicero_del_vacio:
+    name: "Hechicero del Vacío"
+    tier: 7
+    archetype: SUMMONER
+    entity: ENDERMAN
+    stats: { health: 1900, damage: 19, armor: 3, toughness: 3, speed: 0.12 }
+    equipment:
+      main_hand: STICK
+      helmet: DIAMOND_HELMET
+      chestplate: DIAMOND_CHESTPLATE
+      leggings: DIAMOND_LEGGINGS
+      boots: DIAMOND_BOOTS
+    abilities: [meteor_rain, summon_elite, teleport, shield]
+    xp: 400
+
+  general_de_la_legion:
+    name: "General de la Legion"
+    tier: 7
+    archetype: BRUTE
+    entity: VINDICATOR
+    stats: { health: 1900, damage: 19, armor: 3, toughness: 3, speed: 0.12 }
+    equipment:
+      main_hand: IRON_SWORD
+      helmet: IRON_HELMET
+      chestplate: IRON_CHESTPLATE
+      leggings: IRON_LEGGINGS
+      boots: IRON_BOOTS
+    abilities: [charge, cleave, summon_minions, ground_slam]
+    xp: 400
+
+  # ------------------------- TIER 8 -------------------------
+  espectro_del_eclipse:
+    name: "Espectro del Eclipse"
+    tier: 8
+    archetype: STALKER
+    entity: ENDERMAN
+    stats: { health: 2500, damage: 23, armor: 4, toughness: 3, speed: 0.14 }
+    equipment:
+      main_hand: IRON_SWORD
+      helmet: CHAINMAIL_HELMET
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+    abilities: [shadow_step, fear, life_drain, blinding_dust]
+    xp: 450
+
+  verdugo_de_estrellas:
+    name: "Verdugo de Estrellas"
+    tier: 8
+    archetype: RANGER
+    entity: SKELETON
+    stats: { health: 2500, damage: 23, armor: 4, toughness: 3, speed: 0.14 }
+    equipment:
+      main_hand: BOW
+      helmet: CHAINMAIL_HELMET
+      chestplate: CHAINMAIL_CHESTPLATE
+      leggings: CHAINMAIL_LEGGINGS
+      boots: CHAINMAIL_BOOTS
+    abilities: [arrow_volley, meteor_rain, homing_shot, lightning]
+    xp: 450
+
+  # ------------------------- TIER 9 -------------------------
+  guardian_celestial:
+    name: "Guardian Celestial"
+    tier: 9
+    archetype: COLOSSUS
+    entity: IRON_GOLEM
+    stats: { health: 3300, damage: 27, armor: 4, toughness: 4, speed: 0.16 }
+    equipment: {}
+    abilities: [shockwave, shield, heal, reflect, pull]
+    xp: 500
+
+  furia_de_los_cielos:
+    name: "Furia de los Cielos"
+    tier: 9
+    archetype: BERSERKER
+    entity: RAVAGER
+    stats: { health: 3300, damage: 27, armor: 4, toughness: 4, speed: 0.16 }
+    equipment:
+      main_hand: DIAMOND_AXE
+      helmet: DIAMOND_HELMET
+      chestplate: DIAMOND_CHESTPLATE
+      leggings: DIAMOND_LEGGINGS
+      boots: DIAMOND_BOOTS
+    abilities: [frenzy, enrage, lightning, charge]
+    xp: 500
+
+  # ------------------------- TIER 10 ------------------------
+  el_primigenio:
+    name: "El Primigenio"
+    tier: 10
+    archetype: COLOSSUS
+    entity: IRON_GOLEM
+    stats: { health: 4500, damage: 32, armor: 5, toughness: 4, speed: 0.18 }
+    equipment:
+      main_hand: DIAMOND_AXE
+      helmet: DIAMOND_HELMET
+      chestplate: DIAMOND_CHESTPLATE
+      leggings: DIAMOND_LEGGINGS
+      boots: DIAMOND_BOOTS
+    abilities: [ground_slam, shockwave, wither_aura, summon_elite, shield, death_nova]
+    xp: 600
+
+  devorador_de_mundos:
+    name: "Devorador de Mundos"
+    tier: 10
+    archetype: STALKER
+    entity: RAVAGER
+    stats: { health: 4500, damage: 32, armor: 5, toughness: 4, speed: 0.18 }
+    equipment: {}
+    abilities: [meteor_rain, shadow_step, life_drain, fear, summon_minions, death_nova]
+    xp: 600

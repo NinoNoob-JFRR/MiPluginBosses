@@ -1,0 +1,72 @@
+# ============================================================
+# MiPluginBosses - Tiers de jefes
+# ============================================================
+# 10 tiers x 2 jefes = 20 jefes.
+# Los colores se usan en el nombre, el anuncio y el menu.
+# ============================================================
+
+tiers:
+  1:
+    name: "Comun"
+    display: "&aComun"
+    color: "&a"
+    # Probabilidad de que el jefe suelte la Esencia Legendaria.
+    essence-drop-chance: 0.10
+  2:
+    name: "Poco comun"
+    display: "&aPoco comun"
+    color: "&a"
+    essence-drop-chance: 0.20
+  3:
+    name: "Raro"
+    display: "&aRaro"
+    color: "&a"
+    essence-drop-chance: 0.30
+  4:
+    name: "Muy raro"
+    display: "&eMuy raro"
+    color: "&e"
+    essence-drop-chance: 0.40
+  5:
+    name: "Epico"
+    display: "&eEpico"
+    color: "&e"
+    essence-drop-chance: 0.50
+  6:
+    name: "Legendario"
+    display: "&eLegendario"
+    color: "&e"
+    essence-drop-chance: 0.60
+  7:
+    name: "Ancestral"
+    display: "&cAncestral"
+    color: "&c"
+    essence-drop-chance: 0.70
+  8:
+    name: "Mitico"
+    display: "&cMitico"
+    color: "&c"
+    essence-drop-chance: 0.80
+  9:
+    name: "Celestial"
+    display: "&cCelestial"
+    color: "&c"
+    essence-drop-chance: 0.90
+  10:
+    name: "Primigenio"
+    display: "&5Primigenio"
+    color: "&5"
+    essence-drop-chance: 1.00
+
+# Colores del nombre del mob segun su Mob Tier.
+mob-tier-colors:
+  1: "&a"
+  2: "&a"
+  3: "&a"
+  4: "&e"
+  5: "&e"
+  6: "&e"
+  7: "&c"
+  8: "&c"
+  9: "&c"
+  10: "&5"
