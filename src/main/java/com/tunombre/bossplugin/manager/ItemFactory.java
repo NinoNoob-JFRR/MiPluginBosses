@@ -182,7 +182,9 @@ public class ItemFactory {
     }
 
     public void abilities(ItemStack item, Map<String, Integer> abilities) {
-        if (item == null || !item.hasItemMeta()) {
+        // No se usa hasItemMeta(): un item normal (pico/hacha sin meta) devuelve
+        // false aunque getItemMeta() si permita escribirle datos persistentes.
+        if (item == null || item.getType().isAir()) {
             return;
         }
         ItemMeta meta = item.getItemMeta();
@@ -213,7 +215,8 @@ public class ItemFactory {
      * al subir de nivel varias veces.
      */
     public void setAppliedLore(ItemStack item, AbilityDefinition definition, int level) {
-        if (item == null || !item.hasItemMeta()) {
+        // Igual que abilities(): hasItemMeta() es false en items sin meta previa.
+        if (item == null || item.getType().isAir()) {
             return;
         }
         ItemMeta meta = item.getItemMeta();
