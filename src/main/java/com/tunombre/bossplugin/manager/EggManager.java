@@ -49,6 +49,7 @@ public class EggManager {
     private int intervalMinutes;
     private int radius;
     private int minDistance;
+    private int spawnAttempts = 40;
     private boolean requireSurface;
     private boolean avoidLiquid;
     private int despawnMinutes;
@@ -95,6 +96,7 @@ public class EggManager {
         intervalMinutes = Math.max(1, config.get("eggs.yml").getInt("eggs.spawn.interval-minutes", 10));
         radius = Math.max(32, config.get("eggs.yml").getInt("eggs.spawn.radius", 750));
         minDistance = Math.max(16, config.get("eggs.yml").getInt("eggs.spawn.min-distance-between-eggs", 100));
+        spawnAttempts = Math.max(1, config.get("eggs.yml").getInt("eggs.spawn.attempts", 40));
         requireSurface = config.get("eggs.yml").getBoolean("eggs.spawn.require-surface", true);
         avoidLiquid = config.get("eggs.yml").getBoolean("eggs.spawn.avoid-liquid", true);
         despawnMinutes = Math.max(1, config.get("eggs.yml").getInt("eggs.despawn.minutes", 45));
@@ -226,29 +228,56 @@ public class EggManager {
         }
         World world = candidates.get(random.nextInt(candidates.size()));
         Location spawn = world.getSpawnLocation();
-        for (int attempt = 0; attempt < 40; attempt++) {
+        EggData egg = null;
+        // Primera pasada: solo chunks ya generados, para no forzar generacion
+        // de terreno durante el tick del servidor.
+        for (int attempt = 0; attempt < spawnAttempts && egg == null; attempt++) {
             double angle = random.nextDouble() * Math.PI * 2;
             double distance = 100 + random.nextDouble() * Math.max(1, radius - 100);
             int x = spawn.getBlockX() + (int) Math.round(Math.cos(angle) * distance);
             int z = spawn.getBlockZ() + (int) Math.round(Math.sin(angle) * distance);
-            Location surface = surface(world, x, z);
-            if (surface == null) {
+            if (!world.isChunkGenerated(x >> 4, z >> 4)) {
                 continue;
             }
-            if (tooClose(surface)) {
-                continue;
-            }
-            EggData egg = place(world, surface.getBlockX(), surface.getBlockY(), surface.getBlockZ(), 0);
-            if (egg != null) {
-                broadcast(messages.get("egg.spawned"));
-                if (config.get("config.yml").getBoolean("logging.admin-actions", true)) {
-                    plugin.getLogger().info("Huevo natural en " + world.getName() + " "
-                            + egg.x() + "," + egg.y() + "," + egg.z());
-                }
-                return egg;
+            egg = tryPlace(world, x, z);
+        }
+        // Si no habia ningun chunk generado, se genera un unico chunk nuevo
+        // de forma asincrona para no bloquear el hilo principal.
+        if (egg == null) {
+            double angle = random.nextDouble() * Math.PI * 2;
+            double distance = 100 + random.nextDouble() * Math.max(1, radius - 100);
+            int x = spawn.getBlockX() + (int) Math.round(Math.cos(angle) * distance);
+            int z = spawn.getBlockZ() + (int) Math.round(Math.sin(angle) * distance);
+            int chunkX = x >> 4;
+            int chunkZ = z >> 4;
+            world.getChunkAtAsync(chunkX, chunkZ).thenAccept(chunk ->
+                    Bukkit.getScheduler().runTask(plugin, () -> {
+                        EggData placed = tryPlace(world, x, z);
+                        if (placed != null) {
+                            broadcast(messages.get("egg.spawned"));
+                            if (config.get("config.yml").getBoolean("logging.admin-actions", true)) {
+                                plugin.getLogger().info("Huevo natural en " + world.getName() + " "
+                                        + placed.x() + "," + placed.y() + "," + placed.z());
+                            }
+                        }
+                    }));
+        }
+        if (egg != null) {
+            broadcast(messages.get("egg.spawned"));
+            if (config.get("config.yml").getBoolean("logging.admin-actions", true)) {
+                plugin.getLogger().info("Huevo natural en " + world.getName() + " "
+                        + egg.x() + "," + egg.y() + "," + egg.z());
             }
         }
-        return null;
+        return egg;
+    }
+
+    private EggData tryPlace(World world, int x, int z) {
+        Location surface = surface(world, x, z);
+        if (surface == null || tooClose(surface)) {
+            return null;
+        }
+        return place(world, surface.getBlockX(), surface.getBlockY(), surface.getBlockZ(), 0);
     }
 
     /**

@@ -30,6 +30,10 @@ eggs:
     # Distancia minima entre dos huevos.
     min-distance-between-eggs: 100
 
+    # Intentos para encontrar un sitio valido por aparicion.
+    # Solo se usan chunks ya generados; si no hay ninguno, se genera uno solo.
+    attempts: 40
+
     # Solo en superficie, nunca en liquido ni en cuevas.
     require-surface: true
     avoid-liquid: true

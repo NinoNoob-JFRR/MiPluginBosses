@@ -26,9 +26,7 @@ async function api(url, options = {}) {
   const text = await res.text();
   let data;
   try { data = text ? JSON.parse(text) : null; } catch { data = text; }
-  if (!res.ok) {
-    throw new Error(`${options.method || 'GET'} ${url} -> ${res.status}: ${text}`);
-  }
+  if (!res.ok) throw new Error(`${options.method || 'GET'} ${url} -> ${res.status}: ${text}`);
   return data;
 }
 
@@ -51,7 +49,6 @@ function collect(dir, out = []) {
 (async () => {
   const files = collect(ROOT);
   console.log(`Archivos a subir: ${files.length}`);
-
   const ref = await api(`${API}/git/ref/heads/${BRANCH}`);
   const baseSha = ref.object.sha;
   const baseCommit = await api(`${API}/git/commits/${baseSha}`);
@@ -74,37 +71,23 @@ function collect(dir, out = []) {
   }
   console.log('');
 
-  const deleted = [
-    'src/main/java/com/tunombre/bossplugin/boss/Boss.java',
-    'src/main/java/com/tunombre/bossplugin/boss/BossManager.java',
-    'src/main/java/com/tunombre/bossplugin/task/BossBarTask.java'
-  ];
-  for (const p of deleted) {
-    entries.push({ path: p, mode: '100644', type: 'blob', sha: null });
-  }
-
   const tree = await api(`${API}/git/trees`, {
     method: 'POST',
     body: JSON.stringify({ base_tree: baseCommit.tree.sha, tree: entries })
   });
-  console.log(`Tree: ${tree.sha.slice(0, 10)}`);
-
   const commit = await api(`${API}/git/commits`, {
     method: 'POST',
     body: JSON.stringify({
-      message: 'MiPluginBosses 1.0: implementacion completa (20 jefes, 27 habilidades, mob tiers, loot, huevos)',
+      message: 'Fix: evitar generacion sincrona de chunks al aparecer huevos naturales',
       tree: tree.sha,
       parents: [baseSha]
     })
   });
-  console.log(`Commit: ${commit.sha.slice(0, 10)}`);
-
   await api(`${API}/git/refs/heads/${BRANCH}`, {
     method: 'PATCH',
     body: JSON.stringify({ sha: commit.sha, force: false })
   });
-  console.log(`RAMA ${BRANCH} ACTUALIZADA: ${commit.sha}`);
-  fs.writeFileSync(path.join(ROOT, '.last-commit'), commit.sha);
+  console.log(`COMMIT ${BRANCH}: ${commit.sha}`);
 })().catch((err) => {
   console.error('ERROR: ' + err.message);
   process.exit(1);
