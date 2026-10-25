@@ -694,6 +694,7 @@ public class MenuManager {
                 case "progress" -> openProgress(player);
                 case "stats" -> openStats(player);
                 case "help" -> openHelp(player);
+                case "admin_egg" -> openAdminEgg(player);
                 default -> {
                 }
             }
