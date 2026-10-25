@@ -5,6 +5,7 @@ import com.tunombre.bossplugin.model.BossDefinition;
 import com.tunombre.bossplugin.model.EggData;
 import com.tunombre.bossplugin.util.Text;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -167,16 +168,37 @@ public class BossCommand implements CommandExecutor, TabCompleter {
             plugin.getMessages().send(sender, "boss.not-found", "id", args[1]);
             return true;
         }
-        var boss = plugin.getBossManager().spawn(definition, player.getLocation(), player);
+        String mode = args.length >= 3 ? args[2].toLowerCase(Locale.ROOT) : "aqui";
+        Location location;
+        if (mode.equals("aleatorio") || mode.equals("random")) {
+            location = plugin.getBossManager().randomLocation(player.getLocation(), 16);
+        } else if (mode.equals("aqui") || mode.equals("here")) {
+            location = player.getLocation();
+        } else {
+            if (args.length < 5) {
+                plugin.getMessages().send(sender, "general.invalid-coordinates");
+                return true;
+            }
+            try {
+                int x = Integer.parseInt(args[2]);
+                int y = Integer.parseInt(args[3]);
+                int z = Integer.parseInt(args[4]);
+                location = new Location(player.getWorld(), x + 0.5, y, z + 0.5);
+            } catch (NumberFormatException e) {
+                plugin.getMessages().send(sender, "general.invalid-coordinates");
+                return true;
+            }
+        }
+        var boss = plugin.getBossManager().spawn(definition, location, player);
         if (boss == null) {
             plugin.getMessages().send(sender, "general.config-error", "error", "No se pudo invocar el jefe");
             return true;
         }
         plugin.getMessages().send(sender, "admin.boss-spawned",
                 "boss", definition.name(),
-                "x", String.valueOf(player.getLocation().getBlockX()),
-                "y", String.valueOf(player.getLocation().getBlockY()),
-                "z", String.valueOf(player.getLocation().getBlockZ()));
+                "x", String.valueOf(location.getBlockX()),
+                "y", String.valueOf(location.getBlockY()),
+                "z", String.valueOf(location.getBlockZ()));
         return true;
     }
 
@@ -190,23 +212,49 @@ public class BossCommand implements CommandExecutor, TabCompleter {
         }
         int tier = 0;
         int amount = 1;
-        if (args.length >= 2) {
+        int index = 1;
+        if (args.length >= 2 && !isMode(args[1])) {
             try {
                 tier = Math.max(0, Math.min(10, Integer.parseInt(args[1])));
+                index = 2;
             } catch (NumberFormatException e) {
                 plugin.getMessages().send(sender, "general.invalid-number", "value", args[1]);
                 return true;
             }
-        }
-        if (args.length >= 3) {
-            try {
-                amount = Math.max(1, Math.min(10, Integer.parseInt(args[2])));
-            } catch (NumberFormatException e) {
-                plugin.getMessages().send(sender, "general.invalid-number", "value", args[2]);
-                return true;
+            if (args.length >= 3 && isNumber(args[2])) {
+                try {
+                    amount = Math.max(1, Math.min(10, Integer.parseInt(args[2])));
+                    index = 3;
+                } catch (NumberFormatException e) {
+                    plugin.getMessages().send(sender, "general.invalid-number", "value", args[2]);
+                    return true;
+                }
             }
         }
-        List<EggData> eggs = plugin.getEggManager().spawnNear(player, tier, amount);
+        String mode = index < args.length ? args[index].toLowerCase(Locale.ROOT) : "aqui";
+        List<EggData> eggs;
+        if (mode.equals("aleatorio") || mode.equals("random")) {
+            eggs = plugin.getEggManager().spawnNear(player, tier, amount, "");
+        } else if (mode.equals("aqui") || mode.equals("here")) {
+            eggs = plugin.getEggManager().spawnHere(player, tier, amount, "");
+        } else if (isNumber(mode)) {
+            if (args.length < index + 3) {
+                plugin.getMessages().send(sender, "general.invalid-coordinates");
+                return true;
+            }
+            try {
+                int x = Integer.parseInt(args[index]);
+                int y = Integer.parseInt(args[index + 1]);
+                int z = Integer.parseInt(args[index + 2]);
+                eggs = plugin.getEggManager().spawnAt(player, tier, amount, "", x, y, z);
+            } catch (NumberFormatException e) {
+                plugin.getMessages().send(sender, "general.invalid-coordinates");
+                return true;
+            }
+        } else {
+            plugin.getMessages().send(sender, "general.invalid-coordinates");
+            return true;
+        }
         if (eggs.isEmpty()) {
             plugin.getMessages().send(sender, "egg.max-reached",
                     "max", String.valueOf(plugin.getEggManager().maxActive()));
@@ -219,6 +267,25 @@ public class BossCommand implements CommandExecutor, TabCompleter {
                     "z", String.valueOf(egg.z()));
         }
         return true;
+    }
+
+    private boolean isMode(String value) {
+        String lower = value == null ? "" : value.toLowerCase(Locale.ROOT);
+        return lower.equals("aqui") || lower.equals("here")
+                || lower.equals("aleatorio") || lower.equals("random")
+                || isNumber(lower);
+    }
+
+    private boolean isNumber(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private boolean giveCompass(CommandSender sender, String[] args) {
@@ -392,11 +459,41 @@ public class BossCommand implements CommandExecutor, TabCompleter {
                 case "dar" -> filter(new ArrayList<>(plugin.getAbilityManager().abilities().keySet()), args[2]);
                 case "desbloquear" -> filter(List.of("1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), args[2]);
                 case "reset" -> filter(List.of("all", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"), args[2]);
-                case "huevo" -> filter(List.of("1", "2", "3"), args[2]);
+                case "jefe", "invocar" -> filter(List.of("aqui", "aleatorio"), args[2]);
+                case "huevo" -> filter(List.of("1", "2", "3", "aqui", "aleatorio"), args[2]);
                 default -> List.of();
             };
         }
+        if (args.length == 4) {
+            return switch (args[0].toLowerCase(Locale.ROOT)) {
+                case "jefe", "invocar" -> isCoordinate(args[2]) ? List.of("<y>") : List.of();
+                case "huevo" -> filter(List.of("aqui", "aleatorio"), args[3]);
+                default -> List.of();
+            };
+        }
+        if (args.length == 5) {
+            return switch (args[0].toLowerCase(Locale.ROOT)) {
+                case "jefe", "invocar" -> isCoordinate(args[2]) ? List.of("<z>") : List.of();
+                case "huevo" -> isCoordinate(args[3]) ? List.of("<y>") : List.of();
+                default -> List.of();
+            };
+        }
+        if (args.length == 6 && "huevo".equalsIgnoreCase(args[0]) && isCoordinate(args[3])) {
+            return List.of("<z>");
+        }
         return List.of();
+    }
+
+    private boolean isCoordinate(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            Integer.parseInt(value);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
     }
 
     private List<String> onlinePlayers() {

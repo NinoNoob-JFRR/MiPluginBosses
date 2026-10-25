@@ -16,12 +16,18 @@ public class EggData {
     private final long spawnedAt;
     private final long despawnAt;
     private final int forcedTier;
+    private final String forcedBoss;
 
     public EggData(String world, int x, int y, int z, long spawnedAt, long despawnAt) {
-        this(world, x, y, z, spawnedAt, despawnAt, 0);
+        this(world, x, y, z, spawnedAt, despawnAt, 0, "");
     }
 
     public EggData(String world, int x, int y, int z, long spawnedAt, long despawnAt, int forcedTier) {
+        this(world, x, y, z, spawnedAt, despawnAt, forcedTier, "");
+    }
+
+    public EggData(String world, int x, int y, int z, long spawnedAt, long despawnAt,
+                   int forcedTier, String forcedBoss) {
         this.world = world;
         this.x = x;
         this.y = y;
@@ -29,6 +35,7 @@ public class EggData {
         this.spawnedAt = spawnedAt;
         this.despawnAt = despawnAt;
         this.forcedTier = forcedTier;
+        this.forcedBoss = forcedBoss == null ? "" : forcedBoss;
     }
 
     public String worldName() {
@@ -57,6 +64,10 @@ public class EggData {
 
     public int forcedTier() {
         return forcedTier;
+    }
+
+    public String forcedBoss() {
+        return forcedBoss;
     }
 
     public Location location() {

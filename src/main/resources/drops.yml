@@ -18,12 +18,20 @@ drops:
       use-tier-chance: true
 
     # Loot custom extra que suelta el jefe.
+    # Desactivado por defecto: los jefes solo sueltan su esencia y el loot
+    # que el propio jefe genere (no loot aleatorio de mob normal).
     custom-loot:
-      enabled: true
+      enabled: false
       min: 1
       max: 3
       # Usa el tier del jefe para generar el loot.
       use-boss-tier: true
+
+    # Anuncia en el chat los drops que ha soltado el jefe al morir.
+    announce-drop:
+      enabled: true
+      # Si es true, solo lo ven los jugadores del mismo mundo.
+      same-world-only: true
 
     xp:
       base: 50

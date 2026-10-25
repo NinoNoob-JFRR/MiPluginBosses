@@ -4,6 +4,10 @@
 # Menu de jugador y menu de admin separados.
 # Todos los slots son configurables.
 # Acciones: OPEN_MENU, RUN_COMMAND, SUGGEST_COMMAND, CLOSE
+# Acciones dinamicas de admin: ADMIN_BOSS_LIST, BOSS_PICK, BOSS_SPAWN,
+# BOSS_COORDS, EGG_ANY, EGG_TIER_PICK, EGG_PICK, EGG_SPAWN, EGG_COORDS,
+# ADMIN_PLAYERS, ADMIN_PLAYER, ADMIN_GIVE, ADMIN_UNLOCK, ADMIN_RESET_ALL,
+# ADMIN_RESET_TIERS, ADMIN_RESET_TIER y RECIPE.
 # ============================================================
 
 menus:
@@ -91,55 +95,50 @@ menus:
         material: DRAGON_EGG
         name: "&5Huevos"
         lore:
-          - "&7Genera un huevo de jefe."
-          - "&8/boss huevo [tier] [cantidad]"
-        action: SUGGEST_COMMAND
-        command: "/boss huevo "
+          - "&7Genera huevos: al azar,"
+          - "&7por tier o de un jefe concreto."
+        action: OPEN_MENU
+        menu: admin_egg
       compass:
         slot: 11
         material: COMPASS
         name: "&bBrujula de Rastreo"
         lore:
-          - "&7Entrega la brujula a un jugador."
-          - "&8/boss brujula [jugador]"
-        action: SUGGEST_COMMAND
-        command: "/boss brujula "
+          - "&7Elige un jugador y le entrega"
+          - "&7la brujula de rastreo."
+        action: ADMIN_PLAYERS:COMPASS
       give_essence:
         slot: 12
         material: NETHER_STAR
         name: "&6Dar esencia"
         lore:
-          - "&7Entrega una Esencia Legendaria."
-          - "&8/boss dar <jugador> <esencia> [cantidad]"
-        action: SUGGEST_COMMAND
-        command: "/boss dar "
+          - "&7Elige jugador y esencia"
+          - "&7para entregarsela."
+        action: ADMIN_PLAYERS:GIVE
       unlock:
         slot: 13
         material: EXPERIENCE_BOTTLE
         name: "&aDesbloquear tier"
         lore:
-          - "&7Desbloquea un tier a un jugador."
-          - "&8/boss desbloquear <jugador> <tier>"
-        action: SUGGEST_COMMAND
-        command: "/boss desbloquear "
+          - "&7Elige un jugador y el tier"
+          - "&7que quieres desbloquearle."
+        action: ADMIN_PLAYERS:UNLOCK
       reset:
         slot: 14
         material: BARRIER
         name: "&cResetear progreso"
         lore:
-          - "&7Resetea el progreso de un jugador."
-          - "&8/boss reset <jugador> [tier|all]"
-        action: SUGGEST_COMMAND
-        command: "/boss reset "
+          - "&7Elige un jugador y resetea"
+          - "&7todo su progreso o un tier."
+        action: ADMIN_PLAYERS:RESET
       spawn_boss:
         slot: 15
         material: ZOMBIE_HEAD
         name: "&4Invocar jefe"
         lore:
-          - "&7Invoca un jefe por su id."
-          - "&8/boss jefe <id>"
-        action: SUGGEST_COMMAND
-        command: "/boss jefe "
+          - "&7Elige un jefe y donde"
+          - "&7quieres invocarlo."
+        action: ADMIN_BOSS_LIST
       reload:
         slot: 16
         material: REDSTONE
@@ -379,3 +378,304 @@ menus:
         material: BARRIER
         name: "&cCerrar"
         action: CLOSE
+
+  # ----------------------------------------------------------
+  # Admin: elegir jefe para invocar
+  # ----------------------------------------------------------
+  admin_bosses:
+    title: "&8Invocar jefe - Elige jefe"
+    rows: 6
+    paginated: true
+    item:
+      material: ZOMBIE_HEAD
+      name: "%tier_color%%boss_name%"
+      lore:
+        - "&7Tier: %tier_color%%tier_name%"
+        - "&7Arquetipo: &e%archetype%"
+        - "&7Vida: &c%health% &7- Dano: &c%damage%"
+        - ""
+        - "&eClick para elegir ubicacion"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: elegir ubicacion del jefe
+  # ----------------------------------------------------------
+  admin_boss_location:
+    title: "&8Invocar %tier_color%%boss_name%"
+    rows: 3
+    items:
+      here:
+        slot: 11
+        material: GRASS_BLOCK
+        name: "&aAqui mismo"
+        lore:
+          - "&7Invoca el jefe en tu posicion."
+        action: "BOSS_SPAWN:%boss_id%:here"
+      random:
+        slot: 13
+        material: ENDER_PEARL
+        name: "&eAleatorio cerca"
+        lore:
+          - "&7Invoca el jefe en un lugar"
+          - "&7seguro a menos de 16 bloques."
+        action: "BOSS_SPAWN:%boss_id%:random"
+      coords:
+        slot: 15
+        material: MAP
+        name: "&bCoordenadas exactas"
+        lore:
+          - "&7Escribe &eX Y Z &7en el chat."
+        action: "BOSS_COORDS:%boss_id%"
+      back:
+        slot: 22
+        material: ARROW
+        name: "&7Volver"
+        action: ADMIN_BOSS_LIST
+
+  # ----------------------------------------------------------
+  # Admin: menu de huevos
+  # ----------------------------------------------------------
+  admin_egg:
+    title: "&8Generar huevo"
+    rows: 3
+    items:
+      any:
+        slot: 11
+        material: DRAGON_EGG
+        name: "&5Tier aleatorio"
+        lore:
+          - "&7Genera un huevo de un tier"
+          - "&7aleatorio segun tu progreso."
+        action: EGG_ANY
+      by_tier:
+        slot: 13
+        material: EXPERIENCE_BOTTLE
+        name: "&aElegir tier"
+        lore:
+          - "&7Genera un huevo de un tier"
+          - "&7concreto."
+        action: ADMIN_EGG_TIERS
+      by_boss:
+        slot: 15
+        material: ZOMBIE_HEAD
+        name: "&cElegir jefe"
+        lore:
+          - "&7Genera un huevo que siempre"
+          - "&7abre un jefe concreto."
+        action: ADMIN_EGG_BOSSES
+      back:
+        slot: 22
+        material: ARROW
+        name: "&7Volver"
+        action: OPEN_MENU
+        menu: admin
+
+  # ----------------------------------------------------------
+  # Admin: elegir tier de huevo
+  # ----------------------------------------------------------
+  admin_egg_tiers:
+    title: "&8Huevo - Elige tier"
+    rows: 6
+    paginated: true
+    item:
+      material: EXPERIENCE_BOTTLE
+      name: "%tier_color%Tier %tier% &7- %tier_name%"
+      lore:
+        - "&7Jefes en este tier: &e%bosses%"
+        - ""
+        - "&eClick para elegir ubicacion"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: elegir jefe del huevo
+  # ----------------------------------------------------------
+  admin_egg_bosses:
+    title: "&8Huevo - Elige jefe"
+    rows: 6
+    paginated: true
+    item:
+      material: ZOMBIE_HEAD
+      name: "%tier_color%%boss_name%"
+      lore:
+        - "&7Tier: %tier_color%%tier_name%"
+        - "&7Arquetipo: &e%archetype%"
+        - ""
+        - "&eClick para elegir ubicacion"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: ubicacion del huevo
+  # ----------------------------------------------------------
+  admin_egg_location:
+    title: "&8Huevo: %egg_label%"
+    rows: 3
+    items:
+      here:
+        slot: 11
+        material: GRASS_BLOCK
+        name: "&aAqui mismo"
+        lore:
+          - "&7Coloca el huevo a tu alrededor."
+        action: "EGG_SPAWN:%egg_tier%:%egg_boss%:here"
+      random:
+        slot: 13
+        material: ENDER_PEARL
+        name: "&eAleatorio cerca"
+        lore:
+          - "&7Coloca el huevo en la superficie"
+          - "&7a menos de 20 bloques."
+        action: "EGG_SPAWN:%egg_tier%:%egg_boss%:random"
+      coords:
+        slot: 15
+        material: MAP
+        name: "&bCoordenadas exactas"
+        lore:
+          - "&7Escribe &eX Y Z &7en el chat."
+        action: "EGG_COORDS:%egg_tier%:%egg_boss%"
+      back:
+        slot: 22
+        material: ARROW
+        name: "&7Volver"
+        action: ADMIN_EGG
+
+  # ----------------------------------------------------------
+  # Admin: elegir jugador
+  # ----------------------------------------------------------
+  admin_players:
+    title: "&8Elige un jugador"
+    rows: 6
+    paginated: true
+    item:
+      material: PLAYER_HEAD
+      name: "&e%player%"
+      lore:
+        - "&7Tier maximo: &e%tier%"
+        - "&7Puntos: &e%points%"
+        - ""
+        - "&eClick para continuar"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: elegir esencia
+  # ----------------------------------------------------------
+  admin_abilities:
+    title: "&8Dar esencia a %target%"
+    rows: 6
+    paginated: true
+    item:
+      material: NETHER_STAR
+      name: "&b%ability_name%"
+      lore:
+        - "&7Tipo: &e%type%"
+        - "&7Tier: &e%tier%"
+        - "&7Nivel maximo: &e%max_level%"
+        - "&7Coste: &e%cost%"
+        - ""
+        - "&eClick para entregar 1 esencia"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: desbloquear tier
+  # ----------------------------------------------------------
+  admin_unlock_tiers:
+    title: "&8Desbloquear tier a %target%"
+    rows: 6
+    paginated: true
+    item:
+      material: EXPERIENCE_BOTTLE
+      name: "%tier_color%Tier %tier% &7- %tier_name%"
+      lore:
+        - "&eClick para desbloquear"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Admin: resetear progreso
+  # ----------------------------------------------------------
+  admin_reset:
+    title: "&8Resetear a %target%"
+    rows: 3
+    items:
+      all:
+        slot: 11
+        material: TNT
+        name: "&cResetear todo"
+        lore:
+          - "&7Borra todo el progreso de"
+          - "&e%target%&7."
+        action: "ADMIN_RESET_ALL:%target%"
+      tier:
+        slot: 15
+        material: BARRIER
+        name: "&eResetear un tier"
+        lore:
+          - "&7Elige el tier a resetear."
+        action: "ADMIN_RESET_TIERS:%target%"
+      back:
+        slot: 22
+        material: ARROW
+        name: "&7Volver"
+        action: "ADMIN_PLAYERS:RESET"
+
+  # ----------------------------------------------------------
+  # Admin: elegir tier a resetear
+  # ----------------------------------------------------------
+  admin_reset_tiers:
+    title: "&8Resetear tier de %target%"
+    rows: 6
+    paginated: true
+    item:
+      material: BARRIER
+      name: "%tier_color%Tier %tier% &7- %tier_name%"
+      lore:
+        - "&eClick para resetear este tier"
+    close-slot: 49
+    prev-slot: 45
+    next-slot: 53
+    page-slot: 48
+
+  # ----------------------------------------------------------
+  # Vista previa de receta (mesa de crafteo 3x3)
+  # ----------------------------------------------------------
+  recipe_preview:
+    title: "&8Receta: %ability_name%"
+    rows: 6
+    # Slots del grid 3x3 dentro del menu.
+    grid-slots: [10, 11, 12, 19, 20, 21, 28, 29, 30]
+    result-slot: 24
+    items:
+      info:
+        slot: 4
+        material: NETHER_STAR
+        name: "&e%ability_name%"
+        lore:
+          - "&7Tier: &e%tier%"
+          - "&7Nivel maximo: &e%max_level%"
+          - ""
+          - "&7Patron:"
+          - "&8A = material principal (x4)"
+          - "&8B = material secundario (x4)"
+          - "&8E = Esencia Legendaria"
+      back:
+        slot: 49
+        material: ARROW
+        name: "&7Volver a recetas"
+        action: OPEN_MENU
+        menu: recipes

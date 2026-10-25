@@ -9,6 +9,7 @@ import com.tunombre.bossplugin.model.BossDefinition;
 import com.tunombre.bossplugin.util.Keys;
 import com.tunombre.bossplugin.util.Text;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -74,6 +75,11 @@ public class BossManager {
     private final Map<String, BossDefinition> definitions = new LinkedHashMap<>();
     private final Map<String, BossAbilityDefinition> abilityCatalog = new LinkedHashMap<>();
     private final Map<UUID, ActiveBoss> active = new HashMap<>();
+    /**
+     * Mientras es mayor que cero, MobListener no aplica tiers ni loot normal.
+     * Se usa durante world.spawnEntity() de jefes y esbirros.
+     */
+    private int spawnGuard;
 
     public BossManager(Main plugin, ConfigManager config, Messages messages, ItemFactory items,
                        TierManager tiers, MobTierManager mobTiers, LootManager loot,
@@ -167,12 +173,50 @@ public class BossManager {
         return active.values();
     }
 
+    /**
+     * Indica si se esta spawneando una entidad del plugin (jefe o esbirro).
+     * MobListener lo consulta para no aplicar tier/loot de mob normal.
+     */
+    public boolean isSpawningPluginEntity() {
+        return spawnGuard > 0;
+    }
+
+    private Entity spawnSuppressed(World world, Location location, EntityType type) {
+        spawnGuard++;
+        try {
+            return world.spawnEntity(location, type);
+        } finally {
+            spawnGuard--;
+        }
+    }
+
+    /**
+     * Busca una ubicacion segura cerca del origen para invocar un jefe.
+     */
+    public Location randomLocation(Location origin, int radius) {
+        if (origin == null || origin.getWorld() == null) {
+            return origin;
+        }
+        World world = origin.getWorld();
+        int bound = Math.max(2, radius);
+        for (int attempt = 0; attempt < 40; attempt++) {
+            int x = origin.getBlockX() + random.nextInt(bound * 2 + 1) - bound;
+            int z = origin.getBlockZ() + random.nextInt(bound * 2 + 1) - bound;
+            int y = world.getHighestBlockYAt(x, z) + 1;
+            Location candidate = new Location(world, x + 0.5, y, z + 0.5);
+            if (world.getBlockAt(x, y, z).isEmpty() && world.getBlockAt(x, y + 1, z).isEmpty()) {
+                return candidate;
+            }
+        }
+        return origin;
+    }
+
     public ActiveBoss spawn(BossDefinition definition, Location location, Player source) {
         if (definition == null || location == null || location.getWorld() == null) {
             return null;
         }
         World world = location.getWorld();
-        Entity spawned = world.spawnEntity(location, definition.entityType());
+        Entity spawned = spawnSuppressed(world, location, definition.entityType());
         if (!(spawned instanceof LivingEntity entity)) {
             spawned.remove();
             plugin.getLogger().warning("El jefe " + definition.id() + " no es una entidad viva.");
@@ -190,6 +234,14 @@ public class BossManager {
         entity.setCanPickupItems(false);
         entity.customName(Text.c(tiers.color(definition.tier()) + definition.name()));
         entity.setCustomNameVisible(true);
+        // Reenvio del nombre un tick despues para asegurar que el cliente
+        // muestre el nombre del jefe desde el primer momento.
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            if (entity.isValid()) {
+                entity.customName(Text.c(tiers.color(definition.tier()) + definition.name()));
+                entity.setCustomNameVisible(true);
+            }
+        });
 
         AttributeInstance health = entity.getAttribute(Attribute.MAX_HEALTH);
         if (health != null) {
@@ -542,7 +594,7 @@ public class BossManager {
                 for (int i = 0; i < count && boss.minions.size() < Math.max(1, effect.i("max_minions", 30)); i++) {
                     Location spawn = center.clone().add(random.nextDouble() * 6 - 3, 0,
                             random.nextDouble() * 6 - 3);
-                    Entity summoned = entity.getWorld().spawnEntity(spawn, type);
+                    Entity summoned = spawnSuppressed(entity.getWorld(), spawn, type);
                     if (!(summoned instanceof LivingEntity minion)) {
                         continue;
                     }
@@ -793,14 +845,31 @@ public class BossManager {
             drop(event, essenceItem);
         }
 
-        boolean customEnabled = drops == null || drops.getBoolean("custom-loot.enabled", true);
+        boolean customEnabled = drops != null && drops.getBoolean("custom-loot.enabled", false);
         if (customEnabled) {
-            int min = drops == null ? 1 : Math.max(1, drops.getInt("custom-loot.min", 1));
-            int max = drops == null ? 3 : Math.max(min, drops.getInt("custom-loot.max", 3));
+            int min = Math.max(1, drops.getInt("custom-loot.min", 1));
+            int max = Math.max(min, drops.getInt("custom-loot.max", 3));
             int count = min + random.nextInt(max - min + 1);
             int lootTier = boss.definition.tier();
             for (int i = 0; i < count; i++) {
                 drop(event, loot.generate(lootTier));
+            }
+        }
+
+        if ((drops == null || drops.getBoolean("announce-drop.enabled", true))
+                && !event.getDrops().isEmpty()) {
+            List<String> names = new ArrayList<>();
+            for (ItemStack item : event.getDrops()) {
+                String name = itemName(item);
+                if (!name.isBlank()) {
+                    names.add(name);
+                }
+            }
+            if (!names.isEmpty()) {
+                broadcastNear(entity.getLocation(), messages.get("boss.drop-announced",
+                        "boss", boss.definition.name(),
+                        "tier_color", tiers.color(boss.definition.tier()),
+                        "items", String.join(", ", names)));
             }
         }
 
@@ -880,6 +949,32 @@ public class BossManager {
             return;
         }
         event.getDrops().add(item);
+    }
+
+    private String itemName(ItemStack item) {
+        if (item == null) {
+            return "";
+        }
+        ItemMeta meta = item.getItemMeta();
+        if (meta != null && meta.hasDisplayName()) {
+            return Text.strip(PlainTextComponentSerializer.plainText().serialize(meta.displayName()));
+        }
+        return prettify(item.getType().name());
+    }
+
+    private String prettify(String raw) {
+        String lower = raw == null ? "" : raw.toLowerCase(Locale.ROOT).replace('_', ' ');
+        StringBuilder sb = new StringBuilder();
+        for (String word : lower.split(" ")) {
+            if (word.isEmpty()) {
+                continue;
+            }
+            if (!sb.isEmpty()) {
+                sb.append(' ');
+            }
+            sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+        }
+        return sb.toString();
     }
 
     private List<Player> creditParticipants(ActiveBoss boss, Location deathLocation) {

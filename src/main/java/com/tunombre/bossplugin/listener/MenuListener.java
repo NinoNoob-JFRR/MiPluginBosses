@@ -3,6 +3,9 @@ package com.tunombre.bossplugin.listener;
 import com.tunombre.bossplugin.Main;
 import com.tunombre.bossplugin.manager.AbilityManager;
 import com.tunombre.bossplugin.manager.MenuManager;
+import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -56,5 +59,17 @@ public class MenuListener implements Listener {
             org.bukkit.Bukkit.getScheduler().runTask(plugin,
                     () -> plugin.getStatsManager().apply(player));
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onChat(AsyncChatEvent event) {
+        Player player = event.getPlayer();
+        if (!plugin.getMenuManager().hasPendingInput(player)) {
+            return;
+        }
+        event.setCancelled(true);
+        String message = PlainTextComponentSerializer.plainText().serialize(event.message());
+        Bukkit.getScheduler().runTask(plugin,
+                () -> plugin.getMenuManager().handleChatInput(player, message));
     }
 }

@@ -64,7 +64,7 @@ abilities:
     icon: IRON_SWORD
     tier: 1
     max_level: 8
-    compatible_with: [SWORD]
+    compatible_with: [SWORD, AXE]
     trigger: ON_BACKSTAB
     levels:
       1: { multiplier: 1.5 }

@@ -327,6 +327,27 @@ public class MobTierManager {
         }
     }
 
+    /**
+     * Reaplica los stats pendientes y vuelve a enviar el nombre al cliente.
+     * Se usa al spawnear (un tick despues) y al cargar chunks, porque el
+     * cliente puede recibir el mob antes de que el nombre este listo.
+     */
+    public void refresh(LivingEntity entity) {
+        if (entity == null || !entity.isValid()) {
+            return;
+        }
+        int tier = tier(entity);
+        if (tier <= 0) {
+            return;
+        }
+        PersistentDataContainer pdc = entity.getPersistentDataContainer();
+        if (!pdc.has(Keys.MOB_APPLIED, PersistentDataType.BYTE)) {
+            apply(entity, tier, stats.getOrDefault(tier, new MobStats(1, 1, 0, 0, 0, 1)));
+        } else {
+            updateName(entity);
+        }
+    }
+
     public void updateName(LivingEntity entity) {
         if (entity == null || !entity.isValid()) {
             return;

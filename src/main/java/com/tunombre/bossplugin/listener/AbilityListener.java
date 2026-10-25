@@ -14,8 +14,10 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.enchantment.EnchantItemEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemDamageEvent;
+import org.bukkit.inventory.CraftingInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
@@ -102,6 +104,37 @@ public class AbilityListener implements Listener {
         if ("active_ability".equals(plugin.getItems().itemType(event.getItem()))) {
             event.setCancelled(true);
         }
+    }
+
+    /**
+     * Permite aplicar esencias en la mesa de crafteo:
+     * exactamente una esencia + un objeto compatible.
+     */
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPrepareCraft(PrepareItemCraftEvent event) {
+        if (event.isRepair()) {
+            return;
+        }
+        CraftingInventory inventory = event.getInventory();
+        ItemStack essence = null;
+        ItemStack target = null;
+        int items = 0;
+        for (ItemStack item : inventory.getMatrix()) {
+            if (item == null || item.getType().isAir()) {
+                continue;
+            }
+            items++;
+            if (plugin.getItems().isType(item, "ability_essence")) {
+                essence = item;
+            } else {
+                target = item;
+            }
+        }
+        if (items != 2 || essence == null || target == null) {
+            return;
+        }
+        ItemStack result = plugin.getAbilityManager().craftResult(target, essence);
+        inventory.setResult(result);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

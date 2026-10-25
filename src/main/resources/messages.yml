@@ -17,6 +17,7 @@ general:
   unknown-command: "&cComando desconocido. Usa &e/boss ayuda&c."
   player-not-found: "&cNo se encontro al jugador &e%player%&c."
   invalid-number: "&cNumero invalido: &e%value%&c."
+  invalid-coordinates: "&cCoordenadas invalidas. Usa &eX Y Z&c."
   reloaded: "&aConfiguracion recargada correctamente."
   world-not-found: "&cMundo no encontrado: &e%world%&c."
   config-error: "&cError de configuracion: &e%error%"
@@ -27,6 +28,14 @@ general:
   page: "&7Pagina &e%page%&7/&e%pages%"
 
 # ------------------------------------------------------------
+# Menus
+# ------------------------------------------------------------
+menu:
+  coords-prompt: "&eEscribe las coordenadas &fX Y Z &een el chat, o &7cancelar&e."
+  coords-invalid: "&cCoordenadas invalidas. Escribe &eX Y Z &c(o &7cancelar&c)."
+  cancelled: "&7Accion cancelada."
+
+# ------------------------------------------------------------
 # Jefes
 # ------------------------------------------------------------
 boss:
@@ -34,6 +43,7 @@ boss:
   announced: "%tier_color%%boss% &7(T%tier%) &aha aparecido. &e%player% &7lo invoco."
   killed: "&aHas derrotado a %tier_color%%boss%&a."
   killed-broadcast: "%tier_color%%boss% &7ha sido derrotado por &e%player%&7."
+  drop-announced: "%tier_color%%boss% &7ha soltado: &f%items%&7."
   despawned: "&7%tier_color%%boss% &7ha desaparecido."
   timer-warning: "&c%tier_color%%boss% &cdesaparecera en &e%seconds%s&c."
   reset-on-death: "&cHas muerto. &e%boss% &cvuelve a estar al 100%."
@@ -120,6 +130,7 @@ stats:
 admin:
   egg-spawned: "&aHuevo generado en &e%x%&7, &e%y%&7, &e%z%&7."
   boss-spawned: "&aJefe &e%boss% &ainvocado en &e%x%&7, &e%y%&7, &e%z%&7."
+  no-players: "&7No hay jugadores conectados para elegir."
   tier-unlocked: "&aTier &e%tier% &adesbloqueado para &e%player%&a."
   progress-reset: "&aProgreso de &e%player% &areseteado."
   essence-given: "&aEsencia entregada a &e%player%&a."

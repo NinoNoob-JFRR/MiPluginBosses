@@ -32,6 +32,7 @@ public class PlayerListener implements Listener {
     @EventHandler
     public void onQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
+        plugin.getMenuManager().clearPendingInput(player);
         plugin.getAbilityManager().onQuit(player);
         plugin.getStatsManager().save();
         plugin.getProgressionManager().save();

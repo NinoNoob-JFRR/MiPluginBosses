@@ -184,13 +184,59 @@ public class AbilityManager {
 
     private boolean isValidTarget(AbilityDefinition definition, ItemStack target) {
         if ("ACTIVE".equals(definition.type())) {
-            return target.getType() == Material.BOOK && target.getEnchantments().isEmpty();
+            if (target.getType() != Material.BOOK || !target.getEnchantments().isEmpty()) {
+                return false;
+            }
+            Map<String, Integer> existing = items.abilities(target);
+            // Un libro normal (sin habilidad) o un libro que ya tiene esta
+            // misma habilidad activa (para subir nivel).
+            return existing.isEmpty()
+                    || (existing.size() == 1
+                    && existing.containsKey(definition.id().toLowerCase(Locale.ROOT)));
         }
         if (target.getType() == Material.BOOK || target.getType() == Material.ENCHANTED_BOOK) {
             return false;
         }
         String category = category(target.getType());
         return definition.compatibleWith().contains(category);
+    }
+
+    /**
+     * Calcula el resultado de aplicar una esencia en una mesa de crafteo.
+     * No modifica el inventario: devuelve el item resultante o null si la
+     * combinacion no es valida. Cada crafteo consume 1 esencia.
+     */
+    public ItemStack craftResult(ItemStack target, ItemStack essence) {
+        if (target == null || target.getType().isAir() || essence == null) {
+            return null;
+        }
+        if (!items.isType(essence, "ability_essence")) {
+            return null;
+        }
+        AbilityDefinition definition = ability(items.abilityId(essence));
+        if (definition == null || !isValidTarget(definition, target)) {
+            return null;
+        }
+        Map<String, Integer> current = new LinkedHashMap<>(items.abilities(target));
+        String abilityKey = definition.id().toLowerCase(Locale.ROOT);
+        if ("ACTIVE".equals(definition.type()) && !current.isEmpty() && !current.containsKey(abilityKey)) {
+            return null;
+        }
+        int level = current.getOrDefault(abilityKey, 0);
+        if (level >= definition.maxLevel()) {
+            return null;
+        }
+        int newLevel = level + 1;
+        current.put(abilityKey, newLevel);
+        ItemStack result = target.clone();
+        result.setAmount(1);
+        items.abilities(result, current);
+        if ("ACTIVE".equals(definition.type())) {
+            items.makeAbilityBook(result, definition, newLevel);
+        } else {
+            items.setAppliedLore(result, definition, newLevel);
+        }
+        return result;
     }
 
     private String category(Material material) {

@@ -15,12 +15,12 @@ commands:
       /boss progreso - Tu progreso
       /boss ayuda - Ayuda
       /boss adminmenu - Menu de administracion
-      /boss huevo [tier] [cantidad] - Genera un huevo
+      /boss huevo [tier] [cantidad] [aqui|aleatorio|x y z] - Genera un huevo
       /boss brujula [jugador] - Entrega la brujula
       /boss dar <jugador> <esencia> [cantidad] - Entrega esencias
       /boss desbloquear <jugador> <tier> - Desbloquea un tier
       /boss reset <jugador> [tier|all] - Resetea progreso
-      /boss jefe <id> - Invoca un jefe
+      /boss jefe <id> [aqui|aleatorio|x y z] - Invoca un jefe
       /boss recargar - Recarga los YAML
       /boss validar - Valida los YAML
     permission: mibosses.user

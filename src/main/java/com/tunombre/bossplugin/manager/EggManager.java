@@ -145,7 +145,8 @@ public class EggManager {
                 long spawnedAt = longNumber(raw.get("spawned-at"), System.currentTimeMillis());
                 long despawnAt = longNumber(raw.get("despawn-at"), spawnedAt + despawnMinutes * 60_000L);
                 int forced = number(raw.get("forced-tier"));
-                EggData eggData = new EggData(world, x, y, z, spawnedAt, despawnAt, forced);
+                String forcedBoss = raw.get("forced-boss") == null ? "" : String.valueOf(raw.get("forced-boss"));
+                EggData eggData = new EggData(world, x, y, z, spawnedAt, despawnAt, forced, forcedBoss);
                 eggs.put(key(world, x, y, z), eggData);
             } catch (Exception e) {
                 plugin.getLogger().warning("Huevo invalido en data/eggs.yml: " + e.getMessage());
@@ -166,6 +167,9 @@ public class EggManager {
             raw.put("spawned-at", egg.spawnedAt());
             raw.put("despawn-at", egg.despawnAt());
             raw.put("forced-tier", egg.forcedTier());
+            if (!egg.forcedBoss().isBlank()) {
+                raw.put("forced-boss", egg.forcedBoss());
+            }
             list.add(raw);
         }
         data.set("eggs", list);
@@ -281,9 +285,25 @@ public class EggManager {
     }
 
     /**
-     * Genera huevos cerca de un jugador (comando de administracion).
+     * Genera huevos en una ubicacion aleatoria cerca del jugador.
      */
     public List<EggData> spawnNear(Player player, int forcedTier, int amount) {
+        return spawnNear(player, forcedTier, amount, "");
+    }
+
+    public List<EggData> spawnNear(Player player, int forcedTier, int amount, String forcedBoss) {
+        return spawnAround(player, forcedTier, amount, forcedBoss, 20);
+    }
+
+    /**
+     * Genera huevos lo mas cerca posible de la ubicacion actual del jugador.
+     */
+    public List<EggData> spawnHere(Player player, int forcedTier, int amount, String forcedBoss) {
+        return spawnAround(player, forcedTier, amount, forcedBoss, 3);
+    }
+
+    private List<EggData> spawnAround(Player player, int forcedTier, int amount,
+                                      String forcedBoss, int radius) {
         List<EggData> spawned = new ArrayList<>();
         int count = Math.max(1, amount);
         for (int i = 0; i < count; i++) {
@@ -291,12 +311,38 @@ public class EggManager {
                 messages.send(player, "egg.max-reached", "max", String.valueOf(maxActive));
                 break;
             }
-            Location surface = surfaceNear(player.getLocation());
+            Location surface = surfaceNear(player.getLocation(), radius);
             if (surface == null) {
                 continue;
             }
             EggData egg = place(surface.getWorld(), surface.getBlockX(), surface.getBlockY(),
-                    surface.getBlockZ(), forcedTier);
+                    surface.getBlockZ(), forcedTier, forcedBoss);
+            if (egg != null) {
+                spawned.add(egg);
+            }
+        }
+        save();
+        return spawned;
+    }
+
+    /**
+     * Genera huevos en unas coordenadas concretas. La Y indicada es la del
+     * bloque donde debe aparecer el huevo; el pedestal se coloca debajo.
+     */
+    public List<EggData> spawnAt(Player player, int forcedTier, int amount,
+                                 String forcedBoss, int x, int y, int z) {
+        List<EggData> spawned = new ArrayList<>();
+        World world = player.getWorld();
+        int count = Math.max(1, amount);
+        for (int i = 0; i < count; i++) {
+            if (eggs.size() >= maxActive) {
+                messages.send(player, "egg.max-reached", "max", String.valueOf(maxActive));
+                break;
+            }
+            if (y <= world.getMinHeight() || y >= world.getMaxHeight()) {
+                break;
+            }
+            EggData egg = place(world, x, y - 1, z, forcedTier, forcedBoss);
             if (egg != null) {
                 spawned.add(egg);
             }
@@ -306,6 +352,10 @@ public class EggManager {
     }
 
     public EggData place(World world, int x, int y, int z, int forcedTier) {
+        return place(world, x, y, z, forcedTier, "");
+    }
+
+    public EggData place(World world, int x, int y, int z, int forcedTier, String forcedBoss) {
         if (world == null || eggs.size() >= maxActive) {
             return null;
         }
@@ -322,7 +372,7 @@ public class EggManager {
         eggBlock.setType(eggMaterial);
         long now = System.currentTimeMillis();
         EggData data = new EggData(world.getName(), x, y + 1, z, now,
-                now + despawnMinutes * 60_000L, forcedTier);
+                now + despawnMinutes * 60_000L, forcedTier, forcedBoss);
         eggs.put(key(data.worldName(), data.x(), data.y(), data.z()), data);
         save();
         return data;
@@ -366,8 +416,13 @@ public class EggManager {
         if (egg == null || player == null) {
             return;
         }
-        int tier = egg.forcedTier() > 0 ? egg.forcedTier() : rollTier(player);
-        BossDefinition definition = pickBoss(tier);
+        BossDefinition definition = egg.forcedBoss().isBlank()
+                ? null : bosses.definition(egg.forcedBoss());
+        int tier = definition != null ? definition.tier()
+                : (egg.forcedTier() > 0 ? egg.forcedTier() : rollTier(player));
+        if (definition == null) {
+            definition = pickBoss(tier);
+        }
         if (definition == null) {
             messages.send(player, "general.config-error", "error", "No hay jefes para el tier " + tier);
             return;
@@ -546,13 +601,18 @@ public class EggManager {
     }
 
     private Location surfaceNear(Location origin) {
+        return surfaceNear(origin, 20);
+    }
+
+    private Location surfaceNear(Location origin, int radius) {
         World world = origin.getWorld();
         if (world == null) {
             return null;
         }
-        for (int attempt = 0; attempt < 40; attempt++) {
-            int x = origin.getBlockX() + random.nextInt(41) - 20;
-            int z = origin.getBlockZ() + random.nextInt(41) - 20;
+        int bound = Math.max(1, radius);
+        for (int attempt = 0; attempt < spawnAttempts; attempt++) {
+            int x = origin.getBlockX() + random.nextInt(bound * 2 + 1) - bound;
+            int z = origin.getBlockZ() + random.nextInt(bound * 2 + 1) - bound;
             Location surface = surface(world, x, z);
             if (surface != null && !tooClose(surface)) {
                 return surface;
