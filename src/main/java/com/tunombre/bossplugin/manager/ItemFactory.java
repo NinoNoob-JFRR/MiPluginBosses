@@ -226,7 +226,9 @@ public class ItemFactory {
         for (Component line : existing) {
             String plain = Text.strip(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
                     .plainText().serialize(line)).trim();
-            if (plain.startsWith(legacyPrefix) || plain.startsWith(epicPrefix)) {
+            // Tambien elimina el lore antiguo sin nivel ("&8Confuse", etc.).
+            if (plain.equals(definition.name())
+                    || plain.startsWith(legacyPrefix) || plain.startsWith(epicPrefix)) {
                 continue;
             }
             lore.add(line);
