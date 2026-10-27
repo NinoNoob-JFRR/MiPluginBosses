@@ -25,7 +25,7 @@ import java.util.Map;
 public class ConfigMigrator {
 
     /** Version de configuracion que aplica este plugin. */
-    private static final int CURRENT_VERSION = 4;
+    private static final int CURRENT_VERSION = 5;
     private static final String VERSION_FILE = ".migration-version";
 
     private final Main plugin;
@@ -76,6 +76,7 @@ public class ConfigMigrator {
         migrateV2(backup);
         migrateV3(backup);
         migrateV4(backup);
+        migrateV5(backup);
     }
 
     /**
@@ -342,6 +343,108 @@ public class ConfigMigrator {
 
         if (changed) {
             saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    /**
+     * v5: Evolution deja de usar niveles de habilidad. La probabilidad
+     * depende solo del tier del mob (5% por tier, maximo 50%) y Backstab
+     * pasa a llamarse Poder Antiguo y funciona con cualquier golpe.
+     */
+    private void migrateV5(boolean backup) {
+        if (readVersion() >= 5) {
+            return;
+        }
+        migrateEvolutionV5(backup);
+        migrateBackstabV5(backup);
+        migrateMenusV5(backup);
+        writeVersion(5);
+        plugin.getLogger().info("Migracion de configuracion v5 aplicada.");
+    }
+
+    private void migrateEvolutionV5(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "essence_abilities.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String evolution = "abilities.evolution";
+        if (!yml.contains(evolution)) {
+            return;
+        }
+        boolean changed = false;
+        changed |= setIfDifferent(yml, evolution + ".max_level", 1);
+
+        Map<String, Object> level = new LinkedHashMap<>();
+        level.put("normal_points", 1);
+        level.put("boss_points", 1);
+        Map<String, Object> levels = new LinkedHashMap<>();
+        levels.put("1", level);
+        changed |= setIfDifferent(yml, evolution + ".levels", levels);
+
+        changed |= setIfDifferent(yml, evolution + ".evolution.chance-per-tier", 5);
+        changed |= setIfDifferent(yml, evolution + ".evolution.max-chance", 50);
+        changed |= setIfDifferent(yml, evolution + ".evolution.point-multiplier", 1.0);
+        changed |= setIfDifferent(yml, evolution + ".lore", List.of(
+                "&7Gana &e1 punto&7 por mob o jefe.",
+                "&7Probabilidad por tier: &e5%&7 x tier.",
+                "&7Tier 1 = &e5%&7, tier 10 = &e50%&7.",
+                "&7Los jefes siempre dan el punto.",
+                "&7Solo funciona mientras esta equipada."));
+
+        if (changed) {
+            saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    private void migrateBackstabV5(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "essence_abilities.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String backstab = "abilities.backstab";
+        if (!yml.contains(backstab)) {
+            return;
+        }
+        boolean changed = false;
+        changed |= setIfDifferent(yml, backstab + ".name", "Poder Antiguo");
+        changed |= setIfDifferent(yml, backstab + ".description",
+                "Multiplica el dano de cualquiera de tus golpes.");
+        changed |= setIfDifferent(yml, backstab + ".trigger", "ON_HIT");
+        changed |= setIfDifferent(yml, backstab + ".combat.message",
+                "&aPoder Antiguo: &ex%multiplier%&a.");
+        changed |= setIfDifferent(yml, backstab + ".lore", List.of(
+                "&7Cada golpe multiplica el dano.",
+                "&7No importa por donde golpees.",
+                "&7Multiplicador: &ex%multiplier%"));
+
+        if (changed) {
+            saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    private void migrateMenusV5(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "menus.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String lorePath = "menus.abilities.item.lore";
+        if (!yml.contains(lorePath)) {
+            return;
+        }
+        List<String> lore = List.of(
+                "&7%ability_description%",
+                "",
+                "&7Tipo: &e%type%",
+                "&7Tier: &e%tier%",
+                "&7Nivel maximo: &e%max_level%",
+                "&7Coste: &e%cost%",
+                "",
+                "&eClick para ver objetos compatibles");
+        if (setIfDifferent(yml, lorePath, lore)) {
+            saveMigrated(yml, file, "menus.yml", backup);
         }
     }
 

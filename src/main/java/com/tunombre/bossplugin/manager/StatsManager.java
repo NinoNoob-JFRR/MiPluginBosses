@@ -198,9 +198,8 @@ public class StatsManager {
 
     /**
      * Evolution da 1 punto por mob (o jefe) cuando sale la tirada. La
-     * probabilidad depende del nivel de Evolution y del tier del mob:
-     * normal_mob_chance es la base para tier 1 y chance-per-tier suma un
-     * porcentaje por cada tier adicional. Los jefes siempre cuentan.
+     * probabilidad depende solo del tier del mob: tier 1 = 5%, tier 2 = 10%
+     * y asi hasta max-chance (50% en tier 10). Los jefes siempre cuentan.
      */
     public void onKill(Player player, boolean boss, int mobTier) {
         int level = evolutionLevel(player);
@@ -209,13 +208,14 @@ public class StatsManager {
         }
         boolean bossAlways = evolution.evolutionBool("boss_always_counts", true);
         int chance;
-        if (boss) {
-            chance = bossAlways ? 100 : evolution.integer(level, "boss_chance", 100);
+        if (boss && bossAlways) {
+            chance = 100;
         } else {
-            int base = evolution.integer(level, "normal_mob_chance", 10);
-            int perTier = Math.max(0, (int) Math.round(evolution.evolutionNum("chance-per-tier", 6)));
+            int perTier = Math.max(1, (int) Math.round(evolution.evolutionNum("chance-per-tier", 5)));
+            int maxChance = Math.max(1, Math.min(100,
+                    (int) Math.round(evolution.evolutionNum("max-chance", 50))));
             int tier = Math.max(1, mobTier);
-            chance = Math.min(100, base + (tier - 1) * perTier);
+            chance = Math.min(maxChance, tier * perTier);
         }
         if (random.nextInt(100) >= chance) {
             return;

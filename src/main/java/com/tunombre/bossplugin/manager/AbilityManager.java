@@ -511,15 +511,6 @@ public class AbilityManager {
             return;
         }
 
-        Integer backstabLevel = levels.get("backstab");
-        if (backstabLevel != null && isBehind(attacker, victim)) {
-            AbilityDefinition definition = ability("backstab");
-            if (definition != null && pay(attacker, definition.foodCost(backstabLevel))) {
-                event.setDamage(event.getDamage() * definition.num(backstabLevel, "multiplier", 1.5));
-                notifyCombat(attacker, victim, definition, backstabLevel);
-            }
-        }
-
         for (Map.Entry<String, Integer> entry : levels.entrySet()) {
             AbilityDefinition definition = ability(entry.getKey());
             if (definition == null || !"PASSIVE".equals(definition.type())) {
@@ -531,6 +522,12 @@ public class AbilityManager {
             int level = entry.getValue();
             int cost = definition.foodCost(level);
             switch (entry.getKey()) {
+                case "backstab" -> {
+                    if (pay(attacker, cost)) {
+                        event.setDamage(event.getDamage() * definition.num(level, "multiplier", 1.5));
+                        notifyCombat(attacker, victim, definition, level);
+                    }
+                }
                 case "poison" -> {
                     if (pay(attacker, cost)) {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON,
@@ -621,16 +618,6 @@ public class AbilityManager {
                 }
             }
         }
-    }
-
-    private boolean isBehind(Player attacker, LivingEntity victim) {
-        org.bukkit.util.Vector facing = victim.getLocation().getDirection().setY(0);
-        org.bukkit.util.Vector toAttacker = attacker.getLocation().toVector()
-                .subtract(victim.getLocation().toVector()).setY(0);
-        if (facing.lengthSquared() < 0.01 || toAttacker.lengthSquared() < 0.01) {
-            return false;
-        }
-        return facing.normalize().dot(toAttacker.normalize()) < -0.2;
     }
 
     private void bleed(Player attacker, LivingEntity victim, AbilityDefinition definition, int level) {

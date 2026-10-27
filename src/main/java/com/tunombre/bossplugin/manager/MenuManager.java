@@ -180,9 +180,50 @@ public class MenuManager {
             values.put("tier", String.valueOf(definition.tier()));
             values.put("max_level", String.valueOf(definition.maxLevel()));
             values.put("cost", costText(definition));
-            entries.add(new Entry(definition, values, ""));
+            entries.add(new Entry(definition, values, "ABILITY:" + definition.id()));
         }
         openPaginated(player, "abilities", page, entries);
+    }
+
+    /**
+     * Detalle de una habilidad: muestra su informacion y los objetos a los
+     * que se puede aplicar (compatible_with traducido a nombres legibles).
+     */
+    public void openAbilityDetail(Player player, String abilityId) {
+        AbilityDefinition definition = abilities.ability(abilityId);
+        if (definition == null) {
+            return;
+        }
+        ConfigurationSection menu = config.get("menus.yml")
+                .getConfigurationSection("menus.ability_detail");
+        if (menu == null) {
+            return;
+        }
+        Map<String, String> placeholders = basePlaceholders(player);
+        placeholders.put("ability_id", definition.id());
+        placeholders.put("ability_name", definition.name());
+        placeholders.put("ability_description", definition.description());
+        placeholders.put("type", typeText(definition.type()));
+        placeholders.put("tier", String.valueOf(definition.tier()));
+        placeholders.put("max_level", String.valueOf(definition.maxLevel()));
+        placeholders.put("cost", costText(definition));
+        placeholders.put("trigger", triggerText(definition.trigger()));
+        placeholders.put("compatible", compatibleText(definition));
+
+        MenuHolder holder = new MenuHolder("ability_detail", 1);
+        Inventory inventory = create(holder, menu, 6, placeholders);
+        fill(inventory);
+
+        ConfigurationSection items = menu.getConfigurationSection("items");
+        if (items != null) {
+            for (String key : items.getKeys(false)) {
+                ConfigurationSection item = items.getConfigurationSection(key);
+                if (item != null) {
+                    setSlot(inventory, item.getInt("slot", 0), buildItem(item, placeholders));
+                }
+            }
+        }
+        player.openInventory(inventory);
     }
 
     public void openBosses(Player player, int page) {
@@ -745,6 +786,10 @@ public class MenuManager {
             openRecipePreview(player, action.substring("RECIPE:".length()));
             return;
         }
+        if (upper.startsWith("ABILITY:")) {
+            openAbilityDetail(player, action.substring("ABILITY:".length()));
+            return;
+        }
         if (upper.equals("ADMIN_BOSS_LIST")) {
             openAdminBossList(player, 1);
             return;
@@ -1157,6 +1202,64 @@ public class MenuManager {
                     + " / TP " + AbilityDefinition.scaleFoodCost(definition.nestedCost("teleport", 5)) + " comida";
         }
         return "Comida x" + definition.baseFoodCost();
+    }
+
+    private String typeText(String type) {
+        return switch (type == null ? "" : type.toUpperCase(Locale.ROOT)) {
+            case "ACTIVE" -> "Activa";
+            case "PASSIVE" -> "Pasiva";
+            default -> prettify(type == null ? "" : type);
+        };
+    }
+
+    private String triggerText(String trigger) {
+        return switch (trigger == null ? "" : trigger.toUpperCase(Locale.ROOT)) {
+            case "ACTIVE" -> "Al usar el libro";
+            case "ON_HIT", "ON_BACKSTAB" -> "Al golpear";
+            case "ON_KILL" -> "Al matar";
+            case "ON_BLOCK_BREAK" -> "Al romper bloques";
+            case "ON_INTERVAL" -> "Cada cierto tiempo";
+            default -> prettify(trigger == null ? "" : trigger);
+        };
+    }
+
+    /**
+     * Lista legible de objetos compatibles. Cada categoria se muestra en su
+     * propia linea para que se lea bien en el lore del menu.
+     */
+    private String compatibleText(AbilityDefinition definition) {
+        List<String> categories = definition.compatibleWith();
+        if (categories == null || categories.isEmpty()) {
+            return "&8- &7Cualquier equipo";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (String category : categories) {
+            if (!sb.isEmpty()) {
+                sb.append('\n');
+            }
+            sb.append("&8- &e").append(categoryName(category));
+        }
+        return sb.toString();
+    }
+
+    private String categoryName(String category) {
+        return switch (category == null ? "" : category.toUpperCase(Locale.ROOT)) {
+            case "HELMET" -> "Casco";
+            case "CHESTPLATE" -> "Peto";
+            case "LEGGINGS" -> "Pantalones";
+            case "BOOTS" -> "Botas";
+            case "SWORD" -> "Espada";
+            case "AXE" -> "Hacha";
+            case "PICKAXE" -> "Pico";
+            case "SHOVEL" -> "Pala";
+            case "HOE" -> "Azada";
+            case "BOW" -> "Arco";
+            case "CROSSBOW" -> "Ballesta";
+            case "TRIDENT" -> "Tridente";
+            case "SHIELD" -> "Escudo";
+            case "BOOK" -> "Libro";
+            default -> prettify(category == null ? "" : category);
+        };
     }
 
     private String recipeText(AbilityDefinition definition) {

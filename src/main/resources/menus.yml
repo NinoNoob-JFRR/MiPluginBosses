@@ -204,10 +204,49 @@ menus:
         - "&7Tier: &e%tier%"
         - "&7Nivel maximo: &e%max_level%"
         - "&7Coste: &e%cost%"
+        - ""
+        - "&eClick para ver objetos compatibles"
     close-slot: 49
     prev-slot: 45
     next-slot: 53
     page-slot: 48
+
+  # ----------------------------------------------------------
+  # Detalle de habilidad: objetos a los que se puede aplicar
+  # ----------------------------------------------------------
+  ability_detail:
+    title: "&8Habilidad: %ability_name%"
+    rows: 6
+    items:
+      info:
+        slot: 13
+        material: NETHER_STAR
+        name: "&b%ability_name%"
+        lore:
+          - "&7%ability_description%"
+          - ""
+          - "&7Tipo: &e%type%"
+          - "&7Tier: &e%tier%"
+          - "&7Nivel maximo: &e%max_level%"
+          - "&7Coste: &e%cost%"
+          - "&7Se activa: &e%trigger%"
+      compatible:
+        slot: 22
+        material: ANVIL
+        name: "&eObjetos compatibles"
+        lore:
+          - "&7Puedes aplicar esta habilidad a:"
+          - ""
+          - "%compatible%"
+          - ""
+          - "&8Usa una esencia sobre el objeto"
+          - "&8o combinalos en la mesa de crafteo."
+      back:
+        slot: 49
+        material: ARROW
+        name: "&7Volver a habilidades"
+        action: OPEN_MENU
+        menu: abilities
 
   # ----------------------------------------------------------
   # Submenu: jefes (bestiario)
