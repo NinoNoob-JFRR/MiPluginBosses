@@ -706,11 +706,15 @@ abilities:
     description: "Gana puntos y mejora tus stats permanentemente."
     icon: NETHER_STAR
     tier: 4
-    max_level: 1
+    max_level: 5
     compatible_with: [CHESTPLATE]
     trigger: ON_KILL
     levels:
       1: { normal_points: 1, boss_points: 1 }
+      2: { normal_points: 1, boss_points: 1 }
+      3: { normal_points: 1, boss_points: 1 }
+      4: { normal_points: 1, boss_points: 1 }
+      5: { normal_points: 1, boss_points: 1 }
     cost: { type: FOOD, amount: 1, per: POINT }
     evolution:
       only_highest_instance: true
@@ -724,6 +728,64 @@ abilities:
       point-multiplier: 1.0
       # Comida que cuesta cada activacion (no por punto).
       food-cost: 1
+      # Cada punto siempre suma lo mismo, sin importar el nivel.
+      increments:
+        max_health: 1
+        armor: 1
+        toughness: 1
+        attack_damage: 1
+        attack_speed: 0.05
+        movement_speed: 0.0025
+        knockback_resistance: 0.05
+        luck: 1
+      # Topes segun el nivel de Evolution. Nv.1 = lo que habia antes.
+      caps_by_level:
+        1:
+          max_health: 100
+          armor: 30
+          toughness: 20
+          attack_damage: 40
+          attack_speed: 2.0
+          movement_speed: 0.08
+          knockback_resistance: 1.0
+          luck: 4
+        2:
+          max_health: 220
+          armor: 30
+          toughness: 20
+          attack_damage: 90
+          attack_speed: 2.5
+          movement_speed: 0.09
+          knockback_resistance: 1.0
+          luck: 8
+        3:
+          max_health: 400
+          armor: 30
+          toughness: 20
+          attack_damage: 160
+          attack_speed: 3.0
+          movement_speed: 0.10
+          knockback_resistance: 1.0
+          luck: 12
+        4:
+          max_health: 600
+          armor: 30
+          toughness: 20
+          attack_damage: 260
+          attack_speed: 3.5
+          movement_speed: 0.11
+          knockback_resistance: 1.0
+          luck: 16
+        5:
+          max_health: 800
+          armor: 30
+          toughness: 20
+          attack_damage: 400
+          attack_speed: 4.0
+          movement_speed: 0.12
+          knockback_resistance: 1.0
+          luck: 20
+      # Topes de respaldo (Nv.1) para configuraciones antiguas.
       caps:
         max_health: 100
         armor: 30
@@ -732,16 +794,7 @@ abilities:
         attack_speed: 2.0
         movement_speed: 0.08
         knockback_resistance: 1.0
-        luck: 20
-      increments:
-        max_health: 2
-        armor: 2
-        toughness: 2
-        attack_damage: 2
-        attack_speed: 0.1
-        movement_speed: 0.005
-        knockback_resistance: 0.1
-        luck: 2
+        luck: 4
       weights:
         max_health: 27
         armor: 15
@@ -764,9 +817,11 @@ abilities:
       sound: ENTITY_PLAYER_LEVELUP
     lore:
       - "&7Gana &e1 punto&7 por mob o jefe."
+      - "&7Cada punto suma &e+1&7 a una estadistica."
       - "&7Probabilidad por tier: &e5%&7 x tier."
       - "&7Tier 1 = &e5%&7, tier 10 = &e50%&7."
       - "&7Los jefes siempre dan el punto."
+      - "&7El nivel sube los topes maximos."
       - "&7Solo funciona mientras esta equipada."
     applied_lore:
       - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"

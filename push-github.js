@@ -8,7 +8,7 @@ const TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
 const ROOT = process.cwd();
 const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 const SKIP_WORKFLOW = '.github/workflows/build.yml';
-const MESSAGE = 'Evolution por tier, Poder Antiguo universal y detalle de objetos por habilidad';
+const MESSAGE = 'Evolution: +1 fijo por punto, 5 niveles, topes por nivel y suerte max 20';
 
 if (!TOKEN) {
   console.error('Falta GITHUB_PERSONAL_ACCESS_TOKEN');

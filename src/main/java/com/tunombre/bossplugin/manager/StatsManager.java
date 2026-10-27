@@ -136,7 +136,7 @@ public class StatsManager {
             if (attribute == null) {
                 continue;
             }
-            double amount = Math.min(playerStats.points(stat) * increment(stat), cap(stat));
+            double amount = Math.min(playerStats.points(stat) * increment(stat), cap(stat, level));
             if (amount <= 0) {
                 continue;
             }
@@ -182,11 +182,12 @@ public class StatsManager {
         PlayerStats playerStats = get(player.getUniqueId());
         int current = playerStats.points(stat);
         double increment = increment(stat);
-        double cap = cap(stat);
+        int level = Math.max(1, evolutionLevel(player));
+        double cap = cap(stat, level);
         if (increment <= 0) {
             return false;
         }
-        int maxPoints = (int) Math.round(cap / increment);
+        int maxPoints = (int) Math.ceil(cap / increment);
         int newValue = Math.min(maxPoints, current + amount);
         if (newValue <= current) {
             return false;
@@ -261,12 +262,13 @@ public class StatsManager {
         Map<String, Double> available = new LinkedHashMap<>();
         double total = 0;
         PlayerStats playerStats = get(player.getUniqueId());
+        int level = Math.max(1, evolutionLevel(player));
         for (String stat : STATS) {
             double increment = increment(stat);
             if (increment <= 0) {
                 continue;
             }
-            int maxPoints = (int) Math.round(cap(stat) / increment);
+            int maxPoints = (int) Math.ceil(cap(stat, level) / increment);
             if (playerStats.points(stat) >= maxPoints) {
                 continue;
             }
@@ -291,7 +293,34 @@ public class StatsManager {
     }
 
     public double cap(String stat) {
-        return num("caps", stat, defaultCap(stat));
+        return cap(stat, 1);
+    }
+
+    /** Tope de una estadistica para el nivel indicado de Evolution. */
+    public double cap(String stat, int level) {
+        Map<String, Double> values = caps(level);
+        Double value = values.get(stat);
+        return value == null ? defaultCap(stat) : value;
+    }
+
+    private Map<String, Double> caps(int level) {
+        if (evolution == null) {
+            return Map.of();
+        }
+        Object byLevel = evolution.evolution().get("caps_by_level");
+        if (byLevel instanceof Map<?, ?> levels) {
+            Object levelCaps = levels.get(String.valueOf(Math.max(1, level)));
+            if (levelCaps instanceof Map<?, ?> raw) {
+                Map<String, Double> result = new LinkedHashMap<>();
+                for (Map.Entry<?, ?> entry : raw.entrySet()) {
+                    if (entry.getValue() instanceof Number n) {
+                        result.put(String.valueOf(entry.getKey()), n.doubleValue());
+                    }
+                }
+                return result;
+            }
+        }
+        return map("caps");
     }
 
     public double increment(String stat) {
@@ -307,21 +336,21 @@ public class StatsManager {
             case "attack_speed" -> 2.0;
             case "movement_speed" -> 0.08;
             case "knockback_resistance" -> 1.0;
-            case "luck" -> 20;
+            case "luck" -> 4;
             default -> 0;
         };
     }
 
     private double defaultIncrement(String stat) {
         return switch (stat) {
-            case "max_health" -> 2;
-            case "armor" -> 2;
-            case "toughness" -> 2;
-            case "attack_damage" -> 2;
-            case "attack_speed" -> 0.1;
-            case "movement_speed" -> 0.005;
-            case "knockback_resistance" -> 0.1;
-            case "luck" -> 2;
+            case "max_health" -> 1;
+            case "armor" -> 1;
+            case "toughness" -> 1;
+            case "attack_damage" -> 1;
+            case "attack_speed" -> 0.05;
+            case "movement_speed" -> 0.0025;
+            case "knockback_resistance" -> 0.05;
+            case "luck" -> 1;
             default -> 0;
         };
     }
@@ -374,11 +403,16 @@ public class StatsManager {
     }
 
     public int maxPoints() {
+        return maxPoints(null);
+    }
+
+    public int maxPoints(Player player) {
+        int level = player == null ? 1 : Math.max(1, evolutionLevel(player));
         int total = 0;
         for (String stat : STATS) {
             double increment = increment(stat);
             if (increment > 0) {
-                total += (int) Math.round(cap(stat) / increment);
+                total += (int) Math.ceil(cap(stat, level) / increment);
             }
         }
         return total;
@@ -388,6 +422,7 @@ public class StatsManager {
         List<StatLine> lines = new ArrayList<>();
         PlayerStats playerStats = get(player.getUniqueId());
         boolean evolutionActive = hasEvolutionEquipped(player);
+        int level = Math.max(1, evolutionLevel(player));
         for (String stat : STATS) {
             Attribute attribute = attribute(stat);
             if (attribute == null) {
@@ -399,8 +434,10 @@ public class StatsManager {
             }
             double total = instance.getValue();
             double base = instance.getBaseValue();
-            double evolutionValue = Math.min(playerStats.points(stat) * increment(stat), cap(stat));
+            double capValue = cap(stat, level);
+            double evolutionValue = Math.min(playerStats.points(stat) * increment(stat), capValue);
             double equipment = total - base - (evolutionActive ? evolutionValue : 0);
+            int maxPoints = (int) Math.ceil(capValue / Math.max(0.0001, increment(stat)));
             lines.add(new StatLine(
                     stat,
                     label(stat),
@@ -409,10 +446,10 @@ public class StatsManager {
                     equipment,
                     total,
                     playerStats.points(stat),
-                    (int) Math.round(cap(stat) / Math.max(0.0001, increment(stat))),
-                    cap(stat),
+                    maxPoints,
+                    capValue,
                     increment(stat),
-                    playerStats.points(stat) >= (int) Math.round(cap(stat) / Math.max(0.0001, increment(stat)))
+                    playerStats.points(stat) >= maxPoints
             ));
         }
         return lines;

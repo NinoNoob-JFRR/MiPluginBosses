@@ -25,7 +25,7 @@ import java.util.Map;
 public class ConfigMigrator {
 
     /** Version de configuracion que aplica este plugin. */
-    private static final int CURRENT_VERSION = 5;
+    private static final int CURRENT_VERSION = 6;
     private static final String VERSION_FILE = ".migration-version";
 
     private final Main plugin;
@@ -77,6 +77,7 @@ public class ConfigMigrator {
         migrateV3(backup);
         migrateV4(backup);
         migrateV5(backup);
+        migrateV6(backup);
     }
 
     /**
@@ -446,6 +447,92 @@ public class ConfigMigrator {
         if (setIfDifferent(yml, lorePath, lore)) {
             saveMigrated(yml, file, "menus.yml", backup);
         }
+    }
+
+    /**
+     * v6: Evolution sube a 5 niveles. Cada punto suma siempre +1 (sin
+     * multiplicar por nivel), los topes dependen del nivel y la suerte
+     * maxima en Nv.5 es 20.
+     */
+    private void migrateV6(boolean backup) {
+        if (readVersion() >= 6) {
+            return;
+        }
+        migrateEvolutionV6(backup);
+        writeVersion(6);
+        plugin.getLogger().info("Migracion de configuracion v6 aplicada.");
+    }
+
+    private void migrateEvolutionV6(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "essence_abilities.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String evolution = "abilities.evolution";
+        if (!yml.contains(evolution)) {
+            return;
+        }
+        boolean changed = false;
+        changed |= setIfDifferent(yml, evolution + ".max_level", 5);
+
+        Map<String, Object> levels = new LinkedHashMap<>();
+        for (int i = 1; i <= 5; i++) {
+            Map<String, Object> level = new LinkedHashMap<>();
+            level.put("normal_points", 1);
+            level.put("boss_points", 1);
+            levels.put(String.valueOf(i), level);
+        }
+        changed |= setIfDifferent(yml, evolution + ".levels", levels);
+
+        Map<String, Object> increments = new LinkedHashMap<>();
+        increments.put("max_health", 1);
+        increments.put("armor", 1);
+        increments.put("toughness", 1);
+        increments.put("attack_damage", 1);
+        increments.put("attack_speed", 0.05);
+        increments.put("movement_speed", 0.0025);
+        increments.put("knockback_resistance", 0.05);
+        increments.put("luck", 1);
+        changed |= setIfDifferent(yml, evolution + ".evolution.increments", increments);
+
+        Map<String, Object> capsByLevel = new LinkedHashMap<>();
+        capsByLevel.put("1", caps(100, 30, 20, 40, 2.0, 0.08, 1.0, 4));
+        capsByLevel.put("2", caps(220, 30, 20, 90, 2.5, 0.09, 1.0, 8));
+        capsByLevel.put("3", caps(400, 30, 20, 160, 3.0, 0.10, 1.0, 12));
+        capsByLevel.put("4", caps(600, 30, 20, 260, 3.5, 0.11, 1.0, 16));
+        capsByLevel.put("5", caps(800, 30, 20, 400, 4.0, 0.12, 1.0, 20));
+        changed |= setIfDifferent(yml, evolution + ".evolution.caps_by_level", capsByLevel);
+        changed |= setIfDifferent(yml, evolution + ".evolution.caps",
+                caps(100, 30, 20, 40, 2.0, 0.08, 1.0, 4));
+
+        changed |= setIfDifferent(yml, evolution + ".lore", List.of(
+                "&7Gana &e1 punto&7 por mob o jefe.",
+                "&7Cada punto suma &e+1&7 a una estadistica.",
+                "&7Probabilidad por tier: &e5%&7 x tier.",
+                "&7Tier 1 = &e5%&7, tier 10 = &e50%&7.",
+                "&7Los jefes siempre dan el punto.",
+                "&7El nivel sube los topes maximos.",
+                "&7Solo funciona mientras esta equipada."));
+
+        if (changed) {
+            saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    private Map<String, Object> caps(double health, double armor, double toughness, double damage,
+                                     double attackSpeed, double movementSpeed,
+                                     double knockbackResistance, double luck) {
+        Map<String, Object> caps = new LinkedHashMap<>();
+        caps.put("max_health", health);
+        caps.put("armor", armor);
+        caps.put("toughness", toughness);
+        caps.put("attack_damage", damage);
+        caps.put("attack_speed", attackSpeed);
+        caps.put("movement_speed", movementSpeed);
+        caps.put("knockback_resistance", knockbackResistance);
+        caps.put("luck", luck);
+        return caps;
     }
 
     private boolean setIfDifferent(YamlConfiguration yml, String path, Object value) {

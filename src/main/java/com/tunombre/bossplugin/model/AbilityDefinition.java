@@ -103,6 +103,17 @@ public class AbilityDefinition {
             if (inc != null) {
                 evolution.put("increments", new LinkedHashMap<>(inc.getValues(false)));
             }
+            ConfigurationSection capsByLevel = evoSection.getConfigurationSection("caps_by_level");
+            if (capsByLevel != null) {
+                Map<String, Object> byLevel = new LinkedHashMap<>();
+                for (String key : capsByLevel.getKeys(false)) {
+                    ConfigurationSection levelCaps = capsByLevel.getConfigurationSection(key);
+                    if (levelCaps != null) {
+                        byLevel.put(key, new LinkedHashMap<>(levelCaps.getValues(false)));
+                    }
+                }
+                evolution.put("caps_by_level", byLevel);
+            }
             ConfigurationSection weights = evoSection.getConfigurationSection("weights");
             if (weights != null) {
                 evolution.put("weights", new LinkedHashMap<>(weights.getValues(false)));

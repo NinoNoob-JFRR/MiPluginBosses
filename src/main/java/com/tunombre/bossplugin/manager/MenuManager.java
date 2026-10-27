@@ -102,7 +102,7 @@ public class MenuManager {
         placeholders.put("evolution_equipped", level > 0
                 ? messages.raw("stats.evolution-equipped") : messages.raw("stats.evolution-not-equipped"));
         placeholders.put("points", String.valueOf(stats.totalPoints(player)));
-        placeholders.put("max_points", String.valueOf(stats.maxPoints()));
+        placeholders.put("max_points", String.valueOf(stats.maxPoints(player)));
         List<StatsManager.StatLine> lines = stats.snapshot(player);
         placeholders.put("maxed", String.valueOf(lines.stream().filter(StatsManager.StatLine::maxed).count()));
         placeholders.put("evolution_progress", evolutionProgress(lines));
@@ -1137,7 +1137,7 @@ public class MenuManager {
         values.put("player", player.getName());
         values.put("tier", String.valueOf(progression.maxTier(player.getUniqueId())));
         values.put("points", String.valueOf(stats.totalPoints(player)));
-        values.put("max_points", String.valueOf(stats.maxPoints()));
+        values.put("max_points", String.valueOf(stats.maxPoints(player)));
         return values;
     }
 
