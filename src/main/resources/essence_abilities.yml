@@ -570,7 +570,7 @@ abilities:
       3: { effect_level: 3, duration_seconds: 30 }
       4: { effect_level: 4, duration_seconds: 35 }
       5: { effect_level: 5, duration_seconds: 45 }
-    cost: { type: FOOD, amount: 2, per: TRIGGER }
+    cost: { type: FOOD, amount: 2, per: INTERVAL }
     lore:
       - "&7Activa: aumenta tu velocidad."
       - "&7Nivel: &a%effect_level%"

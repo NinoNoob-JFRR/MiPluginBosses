@@ -44,6 +44,39 @@ performance:
   stats-menu-interval-ticks: 20
 
 # ------------------------------------------------------------
+# Scoreboard lateral
+# ------------------------------------------------------------
+# Scoreboard por jugador con sus atributos basicos y la vida actual.
+scoreboard:
+  # Muestra la scoreboard a todos los jugadores.
+  enabled: true
+  # Titulo de la scoreboard.
+  title: "&e&lATRIBUTOS"
+  # Cada cuantos ticks se refrescan los valores (20 = 1 segundo).
+  # La vida se actualiza al instante al recibir dano o curarse.
+  update-interval-ticks: 20
+  # Lineas de arriba a abajo. Puedes cambiar el orden, los colores y el texto.
+  # Placeholders:
+  #   %health_current%  vida actual
+  #   %health_max%      vida maxima
+  #   %armor%           armadura
+  #   %attack_damage%   dano de ataque
+  #   %toughness%       dureza
+  #   %movement_speed%  velocidad
+  #   %luck%            suerte
+  #   %attack_speed%    velocidad de ataque
+  #   %knockback_resistance%  resistencia al empuje
+  #   %evolution_level% nivel de Evolution equipado
+  #   %player%          nombre del jugador
+  lines:
+    - "&c\u2764 %health_current%/%health_max%"
+    - "&7Armadura: &f%armor%"
+    - "&7Daño: &f%attack_damage%"
+    - "&7Dureza: &f%toughness%"
+    - "&7Velocidad: &f%movement_speed%"
+    - "&7Suerte: &f%luck%"
+
+# ------------------------------------------------------------
 # Habilidades
 # ------------------------------------------------------------
 abilities:
@@ -62,10 +95,10 @@ bossbar-max-distance: 100
 # Este bloque se mantiene como respaldo para versiones antiguas.
 messages:
   prefix: "&8[&cJefes&8]&r "
-  boss-summoned: "&aSe ha invocado a &e{boss}&a en tu ubicacion."
+  boss-summoned: "&aSe ha invocado a &e{boss}&a en tu ubicación."
   boss-list-header: "&e--- Jefes disponibles ---"
   boss-list-item: "&7- &f{key} &8({vida} vida, {danio} danio)"
   boss-not-found: "&cEse jefe no existe. Usa /boss listar para ver la lista."
   no-permission: "&cNo tienes permiso para usar este comando."
   only-players: "&cSolo los jugadores pueden usar este comando."
-  reloaded: "&aConfiguracion recargada."
+  reloaded: "&aConfiguración recargada."

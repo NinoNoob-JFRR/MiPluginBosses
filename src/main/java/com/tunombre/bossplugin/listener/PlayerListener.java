@@ -57,6 +57,9 @@ public class PlayerListener implements Listener {
         if (!(event.getWhoClicked() instanceof Player player)) {
             return;
         }
-        Bukkit.getScheduler().runTask(plugin, () -> plugin.getStatsManager().apply(player));
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getStatsManager().apply(player);
+            plugin.getScoreboardManager().refresh(player);
+        });
     }
 }

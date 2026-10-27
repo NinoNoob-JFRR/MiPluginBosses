@@ -95,8 +95,8 @@ menus:
         material: DRAGON_EGG
         name: "&5Huevos"
         lore:
-          - "&7Genera huevos: al azar,"
-          - "&7por tier o de un jefe concreto."
+          - "&7Genera un huevo de jefe."
+          - "&8/boss huevo [tier] [cantidad]"
         action: OPEN_MENU
         menu: admin_egg
       compass:
@@ -104,40 +104,40 @@ menus:
         material: COMPASS
         name: "&bBrujula de Rastreo"
         lore:
-          - "&7Elige un jugador y le entrega"
-          - "&7la brujula de rastreo."
+          - "&7Entrega la brujula a un jugador."
+          - "&8/boss brujula [jugador]"
         action: ADMIN_PLAYERS:COMPASS
       give_essence:
         slot: 12
         material: NETHER_STAR
         name: "&6Dar esencia"
         lore:
-          - "&7Elige jugador y esencia"
-          - "&7para entregarsela."
+          - "&7Entrega una Esencia Legendaria."
+          - "&8/boss dar <jugador> <esencia> [cantidad]"
         action: ADMIN_PLAYERS:GIVE
       unlock:
         slot: 13
         material: EXPERIENCE_BOTTLE
         name: "&aDesbloquear tier"
         lore:
-          - "&7Elige un jugador y el tier"
-          - "&7que quieres desbloquearle."
+          - "&7Desbloquea un tier a un jugador."
+          - "&8/boss desbloquear <jugador> <tier>"
         action: ADMIN_PLAYERS:UNLOCK
       reset:
         slot: 14
         material: BARRIER
         name: "&cResetear progreso"
         lore:
-          - "&7Elige un jugador y resetea"
-          - "&7todo su progreso o un tier."
+          - "&7Resetea el progreso de un jugador."
+          - "&8/boss reset <jugador> [tier|all]"
         action: ADMIN_PLAYERS:RESET
       spawn_boss:
         slot: 15
         material: ZOMBIE_HEAD
         name: "&4Invocar jefe"
         lore:
-          - "&7Elige un jefe y donde"
-          - "&7quieres invocarlo."
+          - "&7Invoca un jefe por su id."
+          - "&8/boss jefe <id>"
         action: ADMIN_BOSS_LIST
       reload:
         slot: 16

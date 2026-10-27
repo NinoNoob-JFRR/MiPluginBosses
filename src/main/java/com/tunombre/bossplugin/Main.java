@@ -11,6 +11,7 @@ import com.tunombre.bossplugin.listener.EggListener;
 import com.tunombre.bossplugin.listener.MenuListener;
 import com.tunombre.bossplugin.listener.MobListener;
 import com.tunombre.bossplugin.listener.PlayerListener;
+import com.tunombre.bossplugin.listener.ScoreboardListener;
 import com.tunombre.bossplugin.manager.AbilityManager;
 import com.tunombre.bossplugin.manager.BossManager;
 import com.tunombre.bossplugin.manager.EggManager;
@@ -19,11 +20,13 @@ import com.tunombre.bossplugin.manager.LootManager;
 import com.tunombre.bossplugin.manager.MenuManager;
 import com.tunombre.bossplugin.manager.MobTierManager;
 import com.tunombre.bossplugin.manager.ProgressionManager;
+import com.tunombre.bossplugin.manager.ScoreboardManager;
 import com.tunombre.bossplugin.manager.StatsManager;
 import com.tunombre.bossplugin.manager.TierManager;
 import com.tunombre.bossplugin.model.AbilityDefinition;
 import com.tunombre.bossplugin.task.BossTask;
 import com.tunombre.bossplugin.task.EggTask;
+import com.tunombre.bossplugin.task.ScoreboardTask;
 import com.tunombre.bossplugin.task.StatsTask;
 import com.tunombre.bossplugin.util.Keys;
 import org.bukkit.Bukkit;
@@ -54,6 +57,7 @@ public final class Main extends JavaPlugin {
     private TierManager tierManager;
     private ProgressionManager progressionManager;
     private StatsManager statsManager;
+    private ScoreboardManager scoreboardManager;
     private MobTierManager mobTierManager;
     private LootManager lootManager;
     private BossManager bossManager;
@@ -76,6 +80,7 @@ public final class Main extends JavaPlugin {
         tierManager = new TierManager(configManager);
         progressionManager = new ProgressionManager(this, configManager);
         statsManager = new StatsManager(this, configManager, messages, items);
+        scoreboardManager = new ScoreboardManager(this, configManager);
         mobTierManager = new MobTierManager(this, configManager);
         lootManager = new LootManager(this, configManager, tierManager, mobTierManager);
         bossManager = new BossManager(this, configManager, messages, items, tierManager,
@@ -93,6 +98,7 @@ public final class Main extends JavaPlugin {
 
         for (Player player : Bukkit.getOnlinePlayers()) {
             statsManager.apply(player);
+            scoreboardManager.setup(player);
         }
 
         getLogger().info("MiPluginBosses activado. Jefes: " + bossManager.bosses().size()
@@ -112,6 +118,9 @@ public final class Main extends JavaPlugin {
         if (eggManager != null) {
             eggManager.save();
         }
+        if (scoreboardManager != null) {
+            scoreboardManager.shutdown();
+        }
         unregisterRecipes();
         getLogger().info("MiPluginBosses desactivado.");
     }
@@ -130,10 +139,12 @@ public final class Main extends JavaPlugin {
         statsManager.reload();
         statsManager.load();
         progressionManager.load();
+        scoreboardManager.reload();
         unregisterRecipes();
         registerRecipes();
         for (Player player : Bukkit.getOnlinePlayers()) {
             statsManager.apply(player);
+            scoreboardManager.refresh(player);
         }
         getLogger().info("Recarga completa: " + bossManager.bosses().size() + " jefes, "
                 + abilityManager.abilities().size() + " habilidades, "
@@ -163,6 +174,7 @@ public final class Main extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new AbilityListener(this), this);
         Bukkit.getPluginManager().registerEvents(new MenuListener(this), this);
         Bukkit.getPluginManager().registerEvents(new PlayerListener(this), this);
+        Bukkit.getPluginManager().registerEvents(new ScoreboardListener(this), this);
     }
 
     private void registerCommand() {
@@ -180,6 +192,7 @@ public final class Main extends JavaPlugin {
         Bukkit.getScheduler().runTaskTimer(this, new BossTask(this), 5L, 5L);
         Bukkit.getScheduler().runTaskTimer(this, new EggTask(this), 20L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, new StatsTask(this), 20L, 20L);
+        Bukkit.getScheduler().runTaskTimer(this, new ScoreboardTask(this), 1L, 1L);
     }
 
     private void registerRecipes() {
@@ -280,6 +293,10 @@ public final class Main extends JavaPlugin {
 
     public StatsManager getStatsManager() {
         return statsManager;
+    }
+
+    public ScoreboardManager getScoreboardManager() {
+        return scoreboardManager;
     }
 
     public MobTierManager getMobTierManager() {

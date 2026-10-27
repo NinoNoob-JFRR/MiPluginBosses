@@ -25,7 +25,7 @@ import java.util.Map;
 public class ConfigMigrator {
 
     /** Version de configuracion que aplica este plugin. */
-    private static final int CURRENT_VERSION = 6;
+    private static final int CURRENT_VERSION = 7;
     private static final String VERSION_FILE = ".migration-version";
 
     private final Main plugin;
@@ -78,6 +78,7 @@ public class ConfigMigrator {
         migrateV4(backup);
         migrateV5(backup);
         migrateV6(backup);
+        migrateV7(backup);
     }
 
     /**
@@ -517,6 +518,40 @@ public class ConfigMigrator {
 
         if (changed) {
             saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    /**
+     * v7: anade la scoreboard lateral configurable a config.yml.
+     */
+    private void migrateV7(boolean backup) {
+        if (readVersion() >= 7) {
+            return;
+        }
+        migrateScoreboardV7(backup);
+        writeVersion(7);
+        plugin.getLogger().info("Migracion de configuracion v7 aplicada.");
+    }
+
+    private void migrateScoreboardV7(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "config.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        boolean changed = false;
+        changed |= setIfDifferent(yml, "scoreboard.enabled", true);
+        changed |= setIfDifferent(yml, "scoreboard.title", "&e&lATRIBUTOS");
+        changed |= setIfDifferent(yml, "scoreboard.update-interval-ticks", 20);
+        changed |= setIfDifferent(yml, "scoreboard.lines", List.of(
+                "&c\u2764 %health_current%/%health_max%",
+                "&7Armadura: &f%armor%",
+                "&7Daño: &f%attack_damage%",
+                "&7Dureza: &f%toughness%",
+                "&7Velocidad: &f%movement_speed%",
+                "&7Suerte: &f%luck%"));
+        if (changed) {
+            saveMigrated(yml, file, "config.yml", backup);
         }
     }
 
