@@ -196,22 +196,35 @@ public class StatsManager {
         return true;
     }
 
-    public void onKill(Player player, boolean boss) {
+    /**
+     * Evolution da 1 punto por mob (o jefe) cuando sale la tirada. La
+     * probabilidad depende del nivel de Evolution y del tier del mob:
+     * normal_mob_chance es la base para tier 1 y chance-per-tier suma un
+     * porcentaje por cada tier adicional. Los jefes siempre cuentan.
+     */
+    public void onKill(Player player, boolean boss, int mobTier) {
         int level = evolutionLevel(player);
         if (level <= 0 || evolution == null) {
             return;
         }
         boolean bossAlways = evolution.evolutionBool("boss_always_counts", true);
-        if (!(boss && bossAlways)) {
-            int chance = boss ? evolution.integer(level, "boss_chance", 20)
-                    : evolution.integer(level, "normal_mob_chance", 5);
-            if (random.nextInt(100) >= chance) {
-                return;
-            }
+        int chance;
+        if (boss) {
+            chance = bossAlways ? 100 : evolution.integer(level, "boss_chance", 100);
+        } else {
+            int base = evolution.integer(level, "normal_mob_chance", 10);
+            int perTier = Math.max(0, (int) Math.round(evolution.evolutionNum("chance-per-tier", 6)));
+            int tier = Math.max(1, mobTier);
+            chance = Math.min(100, base + (tier - 1) * perTier);
         }
-        double multiplier = Math.max(0.0, evolution.evolutionNum("point-multiplier", 1.0));
+        if (random.nextInt(100) >= chance) {
+            return;
+        }
+        // 1 punto por kill. point-multiplier se mantiene por compatibilidad,
+        // pero su valor por defecto es 1.0 (sin multiplicar).
         int points = boss ? evolution.integer(level, "boss_points", 1)
                 : evolution.integer(level, "normal_points", 1);
+        double multiplier = Math.max(0.0, evolution.evolutionNum("point-multiplier", 1.0));
         points = Math.max(1, (int) Math.round(points * multiplier));
         int foodCost = Math.max(0, (int) Math.round(evolution.evolutionNum("food-cost", 1.0)));
         if (player.getFoodLevel() < foodCost) {
@@ -221,6 +234,7 @@ public class StatsManager {
             player.setFoodLevel(player.getFoodLevel() - foodCost);
         }
         int gained = 0;
+        String gainedStat = null;
         for (int i = 0; i < points; i++) {
             String stat = chooseStat(player);
             if (stat == null) {
@@ -228,12 +242,15 @@ public class StatsManager {
             }
             if (addPoint(player, stat, 1)) {
                 gained++;
+                if (gainedStat == null) {
+                    gainedStat = stat;
+                }
             }
         }
         if (gained > 0) {
             player.sendActionBar(Text.c(messages.raw("stats.gained-point")
                     .replace("%amount%", String.valueOf(gained))
-                    .replace("%stat%", "Evolution")));
+                    .replace("%stat%", gainedStat == null ? "" : label(gainedStat))));
             player.playSound(player.getLocation(), "entity.player.levelup", 1.0f, 1.2f);
             save();
         }
@@ -283,28 +300,28 @@ public class StatsManager {
 
     private double defaultCap(String stat) {
         return switch (stat) {
-            case "max_health" -> 60;
+            case "max_health" -> 100;
             case "armor" -> 30;
             case "toughness" -> 20;
-            case "attack_damage" -> 20;
-            case "attack_speed" -> 1.2;
-            case "movement_speed" -> 0.06;
-            case "knockback_resistance" -> 0.8;
-            case "luck" -> 10;
+            case "attack_damage" -> 40;
+            case "attack_speed" -> 2.0;
+            case "movement_speed" -> 0.08;
+            case "knockback_resistance" -> 1.0;
+            case "luck" -> 20;
             default -> 0;
         };
     }
 
     private double defaultIncrement(String stat) {
         return switch (stat) {
-            case "max_health" -> 1;
-            case "armor" -> 1;
-            case "toughness" -> 1;
-            case "attack_damage" -> 1;
+            case "max_health" -> 2;
+            case "armor" -> 2;
+            case "toughness" -> 2;
+            case "attack_damage" -> 2;
             case "attack_speed" -> 0.1;
             case "movement_speed" -> 0.005;
-            case "knockback_resistance" -> 0.05;
-            case "luck" -> 1;
+            case "knockback_resistance" -> 0.1;
+            case "luck" -> 2;
             default -> 0;
         };
     }

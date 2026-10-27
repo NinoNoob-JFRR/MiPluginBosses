@@ -25,7 +25,7 @@ import java.util.Map;
 public class ConfigMigrator {
 
     /** Version de configuracion que aplica este plugin. */
-    private static final int CURRENT_VERSION = 3;
+    private static final int CURRENT_VERSION = 4;
     private static final String VERSION_FILE = ".migration-version";
 
     private final Main plugin;
@@ -75,6 +75,7 @@ public class ConfigMigrator {
 
         migrateV2(backup);
         migrateV3(backup);
+        migrateV4(backup);
     }
 
     /**
@@ -274,6 +275,73 @@ public class ConfigMigrator {
                 && !current.toLowerCase(java.util.Locale.ROOT).contains("bloque")) {
             yml.set(path, "&8Haz clic derecho en el aire o en un bloque para usar.");
             saveMigrated(yml, file, "items.yml", backup);
+        }
+    }
+
+    /**
+     * v4: Evolution da 1 punto por kill, con probabilidad creciente segun el
+     * tier del mob, y sube sus limites/incrementos para que se note mas.
+     */
+    private void migrateV4(boolean backup) {
+        if (readVersion() >= 4) {
+            return;
+        }
+        migrateEvolutionV4(backup);
+        writeVersion(4);
+        plugin.getLogger().info("Migracion de configuracion v4 aplicada.");
+    }
+
+    private void migrateEvolutionV4(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "essence_abilities.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String evolution = "abilities.evolution";
+        if (!yml.contains(evolution)) {
+            return;
+        }
+        boolean changed = false;
+
+        Map<String, Object> levels = new LinkedHashMap<>();
+        levels.put("1", evolutionLevel(10, 100, 1, 1));
+        levels.put("2", evolutionLevel(20, 100, 1, 1));
+        levels.put("3", evolutionLevel(30, 100, 1, 1));
+        changed |= setIfDifferent(yml, evolution + ".levels", levels);
+        changed |= setIfDifferent(yml, evolution + ".evolution.chance-per-tier", 6);
+        changed |= setIfDifferent(yml, evolution + ".evolution.point-multiplier", 1.0);
+        changed |= setIfDifferent(yml, evolution + ".evolution.food-cost", 1);
+
+        Map<String, Object> caps = new LinkedHashMap<>();
+        caps.put("max_health", 100);
+        caps.put("armor", 30);
+        caps.put("toughness", 20);
+        caps.put("attack_damage", 40);
+        caps.put("attack_speed", 2.0);
+        caps.put("movement_speed", 0.08);
+        caps.put("knockback_resistance", 1.0);
+        caps.put("luck", 20);
+        changed |= setIfDifferent(yml, evolution + ".evolution.caps", caps);
+
+        Map<String, Object> increments = new LinkedHashMap<>();
+        increments.put("max_health", 2);
+        increments.put("armor", 2);
+        increments.put("toughness", 2);
+        increments.put("attack_damage", 2);
+        increments.put("attack_speed", 0.1);
+        increments.put("movement_speed", 0.005);
+        increments.put("knockback_resistance", 0.1);
+        increments.put("luck", 2);
+        changed |= setIfDifferent(yml, evolution + ".evolution.increments", increments);
+
+        changed |= setIfDifferent(yml, evolution + ".lore", List.of(
+                "&7Gana &e1 punto&7 por mob o jefe.",
+                "&7La probabilidad sube con el tier del mob.",
+                "&7Solo funciona mientras esta equipada.",
+                "&7Solo cuenta la instancia de mayor nivel."));
+
+        if (changed) {
+            saveMigrated(yml, file, "essence_abilities.yml", backup);
         }
     }
 

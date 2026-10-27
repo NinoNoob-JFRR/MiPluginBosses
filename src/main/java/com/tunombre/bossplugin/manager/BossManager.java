@@ -924,7 +924,7 @@ public class BossManager {
                 messages.send(player, "progression.unlocked", "tier", String.valueOf(boss.definition.tier() + 1));
                 player.playSound(player.getLocation(), "entity.player.levelup", 1.0f, 1.0f);
             }
-            stats.onKill(player, true);
+            stats.onKill(player, true, boss.definition.tier());
         }
 
         if (killer != null) {

@@ -709,36 +709,39 @@ abilities:
     compatible_with: [CHESTPLATE]
     trigger: ON_KILL
     levels:
-      1: { normal_mob_chance: 15, boss_chance: 50, normal_points: 1, boss_points: 3 }
-      2: { normal_mob_chance: 25, boss_chance: 75, normal_points: 2, boss_points: 5 }
-      3: { normal_mob_chance: 40, boss_chance: 100, normal_points: 3, boss_points: 8 }
+      1: { normal_mob_chance: 10, boss_chance: 100, normal_points: 1, boss_points: 1 }
+      2: { normal_mob_chance: 20, boss_chance: 100, normal_points: 1, boss_points: 1 }
+      3: { normal_mob_chance: 30, boss_chance: 100, normal_points: 1, boss_points: 1 }
     cost: { type: FOOD, amount: 1, per: POINT }
     evolution:
       only_highest_instance: true
       activates_only_when_equipped: true
       boss_always_counts: true
-      # Multiplica los puntos obtenidos por cada kill.
+      # Porcentaje extra de probabilidad por cada tier del mob.
+      # tier 1 usa normal_mob_chance; cada tier adicional suma esto.
+      chance-per-tier: 6
+      # 1.0 = un punto por kill (sin multiplicar).
       point-multiplier: 1.0
       # Comida que cuesta cada activacion (no por punto).
       food-cost: 1
       caps:
-        max_health: 60
+        max_health: 100
         armor: 30
         toughness: 20
-        attack_damage: 20
-        attack_speed: 1.2
-        movement_speed: 0.06
-        knockback_resistance: 0.8
-        luck: 10
+        attack_damage: 40
+        attack_speed: 2.0
+        movement_speed: 0.08
+        knockback_resistance: 1.0
+        luck: 20
       increments:
-        max_health: 1
-        armor: 1
-        toughness: 1
-        attack_damage: 1
+        max_health: 2
+        armor: 2
+        toughness: 2
+        attack_damage: 2
         attack_speed: 0.1
         movement_speed: 0.005
-        knockback_resistance: 0.05
-        luck: 1
+        knockback_resistance: 0.1
+        luck: 2
       weights:
         max_health: 27
         armor: 15
@@ -760,7 +763,8 @@ abilities:
       action_bar: true
       sound: ENTITY_PLAYER_LEVELUP
     lore:
-      - "&7Gana puntos matando mobs y jefes."
+      - "&7Gana &e1 punto&7 por mob o jefe."
+      - "&7La probabilidad sube con el tier del mob."
       - "&7Solo funciona mientras esta equipada."
       - "&7Solo cuenta la instancia de mayor nivel."
     applied_lore:

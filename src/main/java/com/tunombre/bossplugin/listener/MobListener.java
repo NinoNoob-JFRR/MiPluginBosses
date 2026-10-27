@@ -81,7 +81,7 @@ public class MobListener implements Listener {
 
         Player killer = entity.getKiller();
         if (killer != null) {
-            plugin.getStatsManager().onKill(killer, false);
+            plugin.getStatsManager().onKill(killer, false, plugin.getMobTierManager().tier(entity));
         }
     }
 

@@ -208,8 +208,8 @@ public class AbilityManager {
     /**
      * Calcula el resultado de aplicar una esencia en una mesa de crafteo.
      * No modifica el inventario: devuelve el item resultante o null si la
-     * combinacion no es valida. count es la cantidad total de esencias
-     * disponibles; se consumen tantas como niveles falten hasta el maximo.
+     * combinacion no es valida. count es el numero de esencias que se van a
+     * consumir (una por hueco ocupado en la mesa).
      */
     public ItemStack craftResult(ItemStack target, ItemStack essence, int count) {
         CraftPlan plan = craftPlan(target, essence, count);
@@ -225,10 +225,6 @@ public class AbilityManager {
             items.setAppliedLore(result, plan.definition(), plan.level());
         }
         return result;
-    }
-
-    public ItemStack craftResult(ItemStack target, ItemStack essence) {
-        return craftResult(target, essence, essence == null ? 1 : essence.getAmount());
     }
 
     /** Unidades de esencia que consumiria el crafteo (0 si no es valido). */
@@ -258,7 +254,9 @@ public class AbilityManager {
         if (needed <= 0) {
             return null;
         }
-        int available = Math.max(1, Math.min(count, essence.getAmount()));
+        // Una esencia por hueco: la mesa consume exactamente una por hueco,
+        // asi que el nivel sube como maximo tantos puntos como huecos haya.
+        int available = Math.max(1, count);
         int consume = Math.min(available, needed);
         int newLevel = level + consume;
         current.put(abilityKey, newLevel);
@@ -819,10 +817,8 @@ public class AbilityManager {
         ItemStack main = player.getInventory().getItemInMainHand();
         ItemStack off = player.getInventory().getItemInOffHand();
         ItemStack book = activeBook(main);
-        boolean mainHand = true;
         if (book == null) {
             book = activeBook(off);
-            mainHand = false;
         }
         if (book == null) {
             return false;
@@ -882,24 +878,26 @@ public class AbilityManager {
                 return true;
             }
             case "repair_item" -> {
-                ItemStack target = mainHand ? player.getInventory().getItemInOffHand()
-                        : player.getInventory().getItemInMainHand();
-                ItemMeta meta = target.getItemMeta();
-                if (!(meta instanceof Damageable damageable) || damageable.getDamage() <= 0) {
+                RepairTarget target = findRepairable(player);
+                if (target == null) {
                     return true;
                 }
                 int cost = definition.foodCost(level);
                 if (!pay(player, cost)) {
                     return true;
                 }
-                int max = target.getType().getMaxDurability();
-                int repair = (int) Math.ceil(max * definition.num(level, "repair_percent", 10) / 100.0);
-                damageable.setDamage(Math.max(0, damageable.getDamage() - repair));
-                target.setItemMeta(meta);
-                if (mainHand) {
-                    player.getInventory().setItemInOffHand(target);
+                ItemStack item = target.item();
+                ItemMeta meta = item.getItemMeta();
+                if (meta instanceof Damageable damageable) {
+                    int max = item.getType().getMaxDurability();
+                    int repair = (int) Math.ceil(max * definition.num(level, "repair_percent", 10) / 100.0);
+                    damageable.setDamage(Math.max(0, damageable.getDamage() - repair));
+                    item.setItemMeta(meta);
+                }
+                if (target.offHand()) {
+                    player.getInventory().setItemInOffHand(item);
                 } else {
-                    player.getInventory().setItemInMainHand(target);
+                    player.getInventory().setItem(target.slot(), item);
                 }
                 player.playSound(player.getLocation(), "block.anvil.use", 0.6f, 1.4f);
                 return true;
@@ -908,6 +906,36 @@ public class AbilityManager {
                 return false;
             }
         }
+    }
+
+    /**
+     * Busca un objeto reparable: primero la mano secundaria y despues la
+     * hotbar (incluida la mano principal). Asi RepairItem funciona aunque no
+     * lleves nada reparable en la mano, usando el primer objeto dañado que
+     * encuentre. Si no hay ninguno devuelve null y no se gasta comida.
+     */
+    private RepairTarget findRepairable(Player player) {
+        ItemStack off = player.getInventory().getItemInOffHand();
+        if (isRepairable(off)) {
+            return new RepairTarget(off, -1, true);
+        }
+        for (int slot = 0; slot < 9; slot++) {
+            ItemStack item = player.getInventory().getItem(slot);
+            if (isRepairable(item)) {
+                return new RepairTarget(item, slot, false);
+            }
+        }
+        return null;
+    }
+
+    private boolean isRepairable(ItemStack item) {
+        if (item == null || item.getType().isAir() || item.getType().getMaxDurability() <= 0) {
+            return false;
+        }
+        return item.getItemMeta() instanceof Damageable damageable && damageable.getDamage() > 0;
+    }
+
+    private record RepairTarget(ItemStack item, int slot, boolean offHand) {
     }
 
     /**
