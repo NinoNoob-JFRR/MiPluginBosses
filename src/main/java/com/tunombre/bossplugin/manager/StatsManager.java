@@ -201,20 +201,27 @@ public class StatsManager {
         if (level <= 0 || evolution == null) {
             return;
         }
-        int chance = boss ? evolution.integer(level, "boss_chance", 20)
-                : evolution.integer(level, "normal_mob_chance", 5);
-        if (random.nextInt(100) >= chance) {
-            return;
+        boolean bossAlways = evolution.evolutionBool("boss_always_counts", true);
+        if (!(boss && bossAlways)) {
+            int chance = boss ? evolution.integer(level, "boss_chance", 20)
+                    : evolution.integer(level, "normal_mob_chance", 5);
+            if (random.nextInt(100) >= chance) {
+                return;
+            }
         }
+        double multiplier = Math.max(0.0, evolution.evolutionNum("point-multiplier", 1.0));
         int points = boss ? evolution.integer(level, "boss_points", 1)
                 : evolution.integer(level, "normal_points", 1);
-        int food = Math.min(points, player.getFoodLevel());
-        if (food <= 0) {
+        points = Math.max(1, (int) Math.round(points * multiplier));
+        int foodCost = Math.max(0, (int) Math.round(evolution.evolutionNum("food-cost", 1.0)));
+        if (player.getFoodLevel() < foodCost) {
             return;
         }
-        player.setFoodLevel(player.getFoodLevel() - food);
+        if (foodCost > 0) {
+            player.setFoodLevel(player.getFoodLevel() - foodCost);
+        }
         int gained = 0;
-        for (int i = 0; i < food; i++) {
+        for (int i = 0; i < points; i++) {
             String stat = chooseStat(player);
             if (stat == null) {
                 break;
@@ -276,14 +283,14 @@ public class StatsManager {
 
     private double defaultCap(String stat) {
         return switch (stat) {
-            case "max_health" -> 15;
-            case "armor" -> 10;
-            case "toughness" -> 6;
-            case "attack_damage" -> 5;
-            case "attack_speed" -> 0.6;
-            case "movement_speed" -> 0.03;
-            case "knockback_resistance" -> 0.5;
-            case "luck" -> 5;
+            case "max_health" -> 60;
+            case "armor" -> 30;
+            case "toughness" -> 20;
+            case "attack_damage" -> 20;
+            case "attack_speed" -> 1.2;
+            case "movement_speed" -> 0.06;
+            case "knockback_resistance" -> 0.8;
+            case "luck" -> 10;
             default -> 0;
         };
     }
@@ -293,7 +300,7 @@ public class StatsManager {
             case "max_health" -> 1;
             case "armor" -> 1;
             case "toughness" -> 1;
-            case "attack_damage" -> 0.5;
+            case "attack_damage" -> 1;
             case "attack_speed" -> 0.1;
             case "movement_speed" -> 0.005;
             case "knockback_resistance" -> 0.05;

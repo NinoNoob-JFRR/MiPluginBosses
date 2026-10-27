@@ -8,6 +8,7 @@ const TOKEN = process.env.GITHUB_PERSONAL_ACCESS_TOKEN;
 const ROOT = process.cwd();
 const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 const SKIP_WORKFLOW = '.github/workflows/build.yml';
+const MESSAGE = 'Fix: esencias multiples, Speed activa, Hardy, stats de mobs y lore epico';
 
 if (!TOKEN) {
   console.error('Falta GITHUB_PERSONAL_ACCESS_TOKEN');
@@ -77,11 +78,7 @@ function collect(dir, out = []) {
   });
   const commit = await api(`${API}/git/commits`, {
     method: 'POST',
-    body: JSON.stringify({
-      message: 'Fix: evitar generacion sincrona de chunks al aparecer huevos naturales',
-      tree: tree.sha,
-      parents: [baseSha]
-    })
+    body: JSON.stringify({ message: MESSAGE, tree: tree.sha, parents: [baseSha] })
   });
   await api(`${API}/git/refs/heads/${BRANCH}`, {
     method: 'PATCH',

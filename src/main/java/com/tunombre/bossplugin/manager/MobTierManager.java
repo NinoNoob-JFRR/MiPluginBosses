@@ -53,6 +53,7 @@ public class MobTierManager {
     private boolean alwaysShowName;
     private String nameFormat;
     private int totalWeight;
+    private double statsMultiplier = 1.0;
 
     public MobTierManager(Main plugin, ConfigManager config) {
         this.plugin = plugin;
@@ -69,6 +70,7 @@ public class MobTierManager {
         categories.clear();
 
         enabled = config.get("mobs.yml").getBoolean("mobs.enabled", true);
+        statsMultiplier = Math.max(0.0, config.get("mobs.yml").getDouble("mobs.stats-multiplier", 1.0));
 
         ConfigurationSection dist = config.get("mobs.yml").getConfigurationSection("mobs.distribution");
         if (dist != null) {
@@ -95,12 +97,12 @@ public class MobTierManager {
                         continue;
                     }
                     stats.put(tier, new MobStats(
-                            s.getDouble("health", 1.0),
-                            s.getDouble("damage", 1.0),
-                            s.getDouble("armor", 0.0),
-                            s.getDouble("toughness", 0.0),
+                            s.getDouble("health", 1.0) * statsMultiplier,
+                            s.getDouble("damage", 1.0) * statsMultiplier,
+                            s.getDouble("armor", 0.0) * statsMultiplier,
+                            s.getDouble("toughness", 0.0) * statsMultiplier,
                             s.getDouble("speed", 0.0),
-                            s.getDouble("xp", 1.0)
+                            s.getDouble("xp", 1.0) * statsMultiplier
                     ));
                 } catch (NumberFormatException ignored) {
                 }

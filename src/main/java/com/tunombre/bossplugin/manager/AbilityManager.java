@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
+import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
@@ -65,6 +66,7 @@ public class AbilityManager {
     private final Map<UUID, List<Waypoint>> waypoints = new HashMap<>();
     private final Map<UUID, ItemStack[]> bags = new HashMap<>();
     private final Set<UUID> flightEnabled = new HashSet<>();
+    private final Set<UUID> hardyApplied = new HashSet<>();
     private final Set<UUID> internalDamage = new HashSet<>();
     private final Set<UUID> mining = new HashSet<>();
     private final Map<UUID, Integer> pendingRename = new HashMap<>();
@@ -82,6 +84,8 @@ public class AbilityManager {
 
     public void reload() {
         abilities.clear();
+        AbilityDefinition.foodCostMultiplier(
+                config.getDouble("config.yml", "abilities.food-cost-multiplier", 1.0));
         ConfigurationSection section = config.get("essence_abilities.yml").getConfigurationSection("abilities");
         if (section == null) {
             return;
@@ -204,9 +208,36 @@ public class AbilityManager {
     /**
      * Calcula el resultado de aplicar una esencia en una mesa de crafteo.
      * No modifica el inventario: devuelve el item resultante o null si la
-     * combinacion no es valida. Cada crafteo consume 1 esencia.
+     * combinacion no es valida. count es la cantidad total de esencias
+     * disponibles; se consumen tantas como niveles falten hasta el maximo.
      */
+    public ItemStack craftResult(ItemStack target, ItemStack essence, int count) {
+        CraftPlan plan = craftPlan(target, essence, count);
+        if (plan == null) {
+            return null;
+        }
+        ItemStack result = target.clone();
+        result.setAmount(1);
+        items.abilities(result, plan.abilities());
+        if ("ACTIVE".equals(plan.definition().type())) {
+            items.makeAbilityBook(result, plan.definition(), plan.level());
+        } else {
+            items.setAppliedLore(result, plan.definition(), plan.level());
+        }
+        return result;
+    }
+
     public ItemStack craftResult(ItemStack target, ItemStack essence) {
+        return craftResult(target, essence, essence == null ? 1 : essence.getAmount());
+    }
+
+    /** Unidades de esencia que consumiria el crafteo (0 si no es valido). */
+    public int craftConsume(ItemStack target, ItemStack essence, int count) {
+        CraftPlan plan = craftPlan(target, essence, count);
+        return plan == null ? 0 : plan.consume();
+    }
+
+    private CraftPlan craftPlan(ItemStack target, ItemStack essence, int count) {
         if (target == null || target.getType().isAir() || essence == null) {
             return null;
         }
@@ -223,20 +254,19 @@ public class AbilityManager {
             return null;
         }
         int level = current.getOrDefault(abilityKey, 0);
-        if (level >= definition.maxLevel()) {
+        int needed = definition.maxLevel() - level;
+        if (needed <= 0) {
             return null;
         }
-        int newLevel = level + 1;
+        int available = Math.max(1, Math.min(count, essence.getAmount()));
+        int consume = Math.min(available, needed);
+        int newLevel = level + consume;
         current.put(abilityKey, newLevel);
-        ItemStack result = target.clone();
-        result.setAmount(1);
-        items.abilities(result, current);
-        if ("ACTIVE".equals(definition.type())) {
-            items.makeAbilityBook(result, definition, newLevel);
-        } else {
-            items.setAppliedLore(result, definition, newLevel);
-        }
-        return result;
+        return new CraftPlan(definition, current, newLevel, consume);
+    }
+
+    private record CraftPlan(AbilityDefinition definition, Map<String, Integer> abilities,
+                             int level, int consume) {
     }
 
     private String category(Material material) {
@@ -338,7 +368,7 @@ public class AbilityManager {
                 if (now - last < interval * 1000L) {
                     continue;
                 }
-                int cost = definition.integer(level, "food_cost", definition.costAmount());
+                int cost = definition.foodCost(level);
 
                 if ("fly".equals(key)) {
                     if (player.getGameMode() == org.bukkit.GameMode.CREATIVE
@@ -371,11 +401,7 @@ public class AbilityManager {
                     case "regeneration" -> potion(player, PotionEffectType.REGENERATION,
                             Math.max(1, definition.integer(level, "effect_level", level)),
                             Math.max(1, definition.integer(level, "duration_seconds", 5)));
-                    case "speed" -> potion(player, PotionEffectType.SPEED,
-                            Math.max(1, definition.integer(level, "effect_level", level)),
-                            interval + 2);
-                    case "hardy" -> player.setAbsorptionAmount(
-                            Math.max(0, definition.integer(level, "absorption_hearts", 3) * 2.0));
+                    case "hardy" -> applyHardy(player, definition, level);
                     default -> {
                     }
                 }
@@ -387,6 +413,51 @@ public class AbilityManager {
                     player.setAllowFlight(false);
                 }
             }
+            if (!levels.containsKey("hardy")) {
+                clearHardy(player);
+            }
+        }
+    }
+
+    /**
+     * Hardy: los corazones de absorcion necesitan capacidad en el atributo
+     * MAX_ABSORPTION (por defecto 0), si no setAbsorptionAmount se recorta a 0.
+     */
+    private void applyHardy(Player player, AbilityDefinition definition, int level) {
+        double amount = Math.max(0, definition.num(level, "absorption_hearts", 3) * 2.0);
+        if (amount <= 0) {
+            return;
+        }
+        AttributeInstance maxAbsorption = player.getAttribute(Attribute.MAX_ABSORPTION);
+        if (maxAbsorption != null) {
+            org.bukkit.NamespacedKey key = new org.bukkit.NamespacedKey(plugin, "hardy_absorption");
+            for (AttributeModifier modifier : new ArrayList<>(maxAbsorption.getModifiers())) {
+                if (modifier.getKey().equals(key)) {
+                    maxAbsorption.removeModifier(modifier);
+                }
+            }
+            maxAbsorption.addModifier(new AttributeModifier(key, amount, AttributeModifier.Operation.ADD_NUMBER));
+        }
+        if (player.getAbsorptionAmount() < amount) {
+            player.setAbsorptionAmount(amount);
+        }
+        hardyApplied.add(player.getUniqueId());
+    }
+
+    private void clearHardy(Player player) {
+        if (!hardyApplied.remove(player.getUniqueId())) {
+            return;
+        }
+        AttributeInstance maxAbsorption = player.getAttribute(Attribute.MAX_ABSORPTION);
+        if (maxAbsorption != null) {
+            for (AttributeModifier modifier : new ArrayList<>(maxAbsorption.getModifiers())) {
+                if (modifier.getKey().getKey().equals("hardy_absorption")) {
+                    maxAbsorption.removeModifier(modifier);
+                }
+            }
+        }
+        if (player.getAbsorptionAmount() > 0) {
+            player.setAbsorptionAmount(0);
         }
     }
 
@@ -445,9 +516,9 @@ public class AbilityManager {
         Integer backstabLevel = levels.get("backstab");
         if (backstabLevel != null && isBehind(attacker, victim)) {
             AbilityDefinition definition = ability("backstab");
-            if (definition != null && pay(attacker, definition.costAmount())) {
+            if (definition != null && pay(attacker, definition.foodCost(backstabLevel))) {
                 event.setDamage(event.getDamage() * definition.num(backstabLevel, "multiplier", 1.5));
-                notifyCombat(attacker, victim, definition);
+                notifyCombat(attacker, victim, definition, backstabLevel);
             }
         }
 
@@ -460,14 +531,14 @@ public class AbilityManager {
                 continue;
             }
             int level = entry.getValue();
-            int cost = definition.costAmount();
+            int cost = definition.foodCost(level);
             switch (entry.getKey()) {
                 case "poison" -> {
                     if (pay(attacker, cost)) {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.POISON,
                                 Math.max(1, definition.integer(level, "duration_seconds", 5)) * 20,
                                 Math.max(0, definition.integer(level, "poison_level", level) - 1), false, true, true));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "blinding" -> {
@@ -475,7 +546,7 @@ public class AbilityManager {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.BLINDNESS,
                                 Math.max(1, definition.integer(level, "duration_seconds", 3)) * 20,
                                 Math.max(0, definition.integer(level, "effect_level", 1) - 1), false, true, true));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "confuse" -> {
@@ -483,7 +554,7 @@ public class AbilityManager {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.NAUSEA,
                                 Math.max(1, definition.integer(level, "duration_seconds", 5)) * 20,
                                 Math.max(0, definition.integer(level, "effect_level", 1) - 1), false, true, true));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "slow" -> {
@@ -491,7 +562,7 @@ public class AbilityManager {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS,
                                 Math.max(1, definition.integer(level, "duration_seconds", 5)) * 20,
                                 Math.max(0, definition.integer(level, "effect_level", 1) - 1), false, true, true));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "weaken" -> {
@@ -499,7 +570,7 @@ public class AbilityManager {
                         victim.addPotionEffect(new PotionEffect(PotionEffectType.WEAKNESS,
                                 Math.max(1, definition.integer(level, "duration_seconds", 5)) * 20,
                                 Math.max(0, definition.integer(level, "effect_level", 1) - 1), false, true, true));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "vampiric_regeneration" -> {
@@ -510,14 +581,15 @@ public class AbilityManager {
                             AttributeInstance health = attacker.getAttribute(Attribute.MAX_HEALTH);
                             double max = health == null ? attacker.getHealth() : health.getValue();
                             attacker.setHealth(Math.min(max, attacker.getHealth() + Math.max(0.5, heal)));
-                            notifyCombat(attacker, victim, definition);
+                            notifyCombat(attacker, victim, definition, level,
+                                    Map.of("steal", Text.format(heal)));
                         }
                     }
                 }
                 case "bleed" -> {
                     if (pay(attacker, cost)) {
                         bleed(attacker, victim, definition, level);
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "armor_piercer" -> {
@@ -526,7 +598,7 @@ public class AbilityManager {
                         double armorValue = armor == null ? 0 : armor.getValue();
                         double percent = definition.num(level, "ignore_armor_percent", 10) / 100.0;
                         event.setDamage(event.getDamage() + event.getDamage() * percent * (armorValue / 20.0));
-                        notifyCombat(attacker, victim, definition);
+                        notifyCombat(attacker, victim, definition, level);
                     }
                 }
                 case "call_lighting" -> {
@@ -534,7 +606,7 @@ public class AbilityManager {
                     if (chance >= 100 || (chance > 0 && java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < chance)) {
                         if (pay(attacker, cost)) {
                             lightning(attacker, victim, definition, level, event);
-                            notifyCombat(attacker, victim, definition);
+                            notifyCombat(attacker, victim, definition, level);
                         }
                     }
                 }
@@ -543,7 +615,7 @@ public class AbilityManager {
                     if (chance >= 100 || (chance > 0 && java.util.concurrent.ThreadLocalRandom.current().nextInt(100) < chance)) {
                         if (pay(attacker, cost)) {
                             disarm(victim);
-                            notifyCombat(attacker, victim, definition);
+                            notifyCombat(attacker, victim, definition, level);
                         }
                     }
                 }
@@ -621,7 +693,12 @@ public class AbilityManager {
         victim.getEquipment().setItemInMainHand(null);
     }
 
-    private void notifyCombat(Player attacker, LivingEntity victim, AbilityDefinition definition) {
+    private void notifyCombat(Player attacker, LivingEntity victim, AbilityDefinition definition, int level) {
+        notifyCombat(attacker, victim, definition, level, Map.of());
+    }
+
+    private void notifyCombat(Player attacker, LivingEntity victim, AbilityDefinition definition,
+                              int level, Map<String, String> extra) {
         if (!definition.combatNotify()) {
             return;
         }
@@ -629,7 +706,10 @@ public class AbilityManager {
         if (message == null || message.isBlank()) {
             return;
         }
-        attacker.sendActionBar(Text.c(message.replace("%target%", victim.getName())));
+        Map<String, String> values = definition.placeholders(level);
+        values.put("target", victim.getName());
+        values.putAll(extra);
+        attacker.sendActionBar(Text.c(Text.apply(message, values)));
     }
 
     // ------------------------------------------------------------
@@ -644,7 +724,7 @@ public class AbilityManager {
         Integer veinLevel = levels.get("vein_miner");
         if (veinLevel != null && isOre(block.getType())) {
             AbilityDefinition definition = ability("vein_miner");
-            if (definition != null && pay(player, definition.costAmount())) {
+            if (definition != null && pay(player, definition.foodCost(veinLevel))) {
                 int max = Math.max(2, definition.integer(veinLevel, "max_blocks", 16));
                 breakConnected(block, max, material -> material == block.getType(), player);
             }
@@ -654,7 +734,7 @@ public class AbilityManager {
         if (treeLevel != null && isLog(block.getType())) {
             AbilityDefinition definition = ability("tree_feller");
             if (definition != null) {
-                int cost = definition.integer(treeLevel, "food_cost", definition.costAmount());
+                int cost = definition.foodCost(treeLevel);
                 if (pay(player, cost)) {
                     int max = Math.max(2, definition.integer(treeLevel, "max_logs", 64));
                     breakConnected(block, max, this::isLog, player);
@@ -738,12 +818,10 @@ public class AbilityManager {
     public boolean tryUseActive(Player player) {
         ItemStack main = player.getInventory().getItemInMainHand();
         ItemStack off = player.getInventory().getItemInOffHand();
-        ItemStack book = null;
+        ItemStack book = activeBook(main);
         boolean mainHand = true;
-        if (!items.abilities(main).isEmpty() && "active_ability".equals(items.itemType(main))) {
-            book = main;
-        } else if (!items.abilities(off).isEmpty() && "active_ability".equals(items.itemType(off))) {
-            book = off;
+        if (book == null) {
+            book = activeBook(off);
             mainHand = false;
         }
         if (book == null) {
@@ -765,32 +843,41 @@ public class AbilityManager {
                 return true;
             }
             case "magic_bag" -> {
-                if (pay(player, definition.costAmount())) {
+                if (pay(player, definition.foodCost(level))) {
                     openBag(player, definition, level);
                 }
                 return true;
             }
             case "craft_item" -> {
-                if (pay(player, definition.costAmount())) {
+                if (pay(player, definition.foodCost(level))) {
                     player.openWorkbench(player.getLocation(), true);
                 }
                 return true;
             }
             case "ender_bag" -> {
-                if (pay(player, definition.costAmount())) {
+                if (pay(player, definition.foodCost(level))) {
                     player.openInventory(player.getEnderChest());
                 }
                 return true;
             }
             case "fertilize" -> {
-                if (pay(player, definition.costAmount())) {
+                if (pay(player, definition.foodCost(level))) {
                     fertilize(player, definition, level);
                 }
                 return true;
             }
             case "greater_burst" -> {
-                if (pay(player, definition.costAmount())) {
+                if (pay(player, definition.foodCost(level))) {
                     burst(player, definition, level);
+                }
+                return true;
+            }
+            case "speed" -> {
+                if (pay(player, definition.foodCost(level))) {
+                    potion(player, PotionEffectType.SPEED,
+                            Math.max(1, definition.integer(level, "effect_level", level)),
+                            Math.max(1, definition.integer(level, "duration_seconds", 30)));
+                    player.playSound(player.getLocation(), "entity.experience_orb.pickup", 0.6f, 1.6f);
                 }
                 return true;
             }
@@ -801,7 +888,7 @@ public class AbilityManager {
                 if (!(meta instanceof Damageable damageable) || damageable.getDamage() <= 0) {
                     return true;
                 }
-                int cost = definition.integer(level, "food_cost", definition.costAmount());
+                int cost = definition.foodCost(level);
                 if (!pay(player, cost)) {
                     return true;
                 }
@@ -821,6 +908,31 @@ public class AbilityManager {
                 return false;
             }
         }
+    }
+
+    /**
+     * Devuelve el item si es un libro de habilidad activa. Tambien acepta
+     * libros antiguos sin ITEM_TYPE siempre que la habilidad guardada sea ACTIVE.
+     */
+    public boolean isActiveBook(ItemStack item) {
+        return activeBook(item) != null;
+    }
+
+    private ItemStack activeBook(ItemStack item) {
+        if (item == null || item.getType().isAir()) {
+            return null;
+        }
+        Map<String, Integer> stored = items.abilities(item);
+        if (stored.isEmpty()) {
+            return null;
+        }
+        if (!"active_ability".equals(items.itemType(item))) {
+            AbilityDefinition definition = ability(stored.keySet().iterator().next());
+            if (definition == null || !"ACTIVE".equals(definition.type())) {
+                return null;
+            }
+        }
+        return item;
     }
 
     private void fertilize(Player player, AbilityDefinition definition, int level) {
@@ -942,7 +1054,7 @@ public class AbilityManager {
             messages.send(player, "waypoint.full");
             return;
         }
-        int cost = definition.nestedCost("save", 2);
+        int cost = AbilityDefinition.scaleFoodCost(definition.nestedCost("save", 2));
         if (!pay(player, cost)) {
             return;
         }
@@ -989,7 +1101,7 @@ public class AbilityManager {
             return;
         }
         if (event.isLeftClick()) {
-            int cost = holder.definition.nestedCost("teleport", 5);
+            int cost = AbilityDefinition.scaleFoodCost(holder.definition.nestedCost("teleport", 5));
             if (!pay(player, cost)) {
                 return;
             }

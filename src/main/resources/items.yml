@@ -34,7 +34,7 @@ items:
   # El nombre y el lore se rellenan con los datos de la habilidad.
   ability_book:
     name: "&b%ability_name%"
-    usage: "&8Haz clic derecho en el aire para usar."
+    usage: "&8Haz clic derecho en el aire o en un bloque para usar."
     glow: true
 
   # Brujula que apunta al huevo de jefe mas cercano.

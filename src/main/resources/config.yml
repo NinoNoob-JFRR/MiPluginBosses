@@ -44,6 +44,14 @@ performance:
   stats-menu-interval-ticks: 20
 
 # ------------------------------------------------------------
+# Habilidades
+# ------------------------------------------------------------
+abilities:
+  # Multiplicador global del coste de comida de las habilidades.
+  # 0.5 = la mitad. Los costes positivos nunca bajan de 1.
+  food-cost-multiplier: 0.5
+
+# ------------------------------------------------------------
 # Compatibilidad con versiones anteriores
 # ------------------------------------------------------------
 # Claves antiguas conservadas para no romper instalaciones previas.

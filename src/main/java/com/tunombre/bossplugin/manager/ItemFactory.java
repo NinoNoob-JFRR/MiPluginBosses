@@ -50,11 +50,7 @@ public class ItemFactory {
         if (section == null) {
             return new ItemStack(Material.NETHER_STAR);
         }
-        Map<String, String> values = new LinkedHashMap<>();
-        values.put("ability_name", definition.name());
-        values.put("ability_tier", String.valueOf(definition.tier()));
-        values.put("ability_max_level", String.valueOf(definition.maxLevel()));
-        values.put("level", String.valueOf(level));
+        Map<String, String> values = definition.placeholders(level);
 
         List<String> lore = new ArrayList<>();
         for (String line : section.getStringList("lore")) {
@@ -225,16 +221,17 @@ public class ItemFactory {
         }
         List<Component> existing = meta.lore() == null ? new ArrayList<>() : new ArrayList<>(meta.lore());
         List<Component> lore = new ArrayList<>();
-        String prefix = definition.name() + " Nv.";
+        String legacyPrefix = definition.name() + " Nv.";
+        String epicPrefix = "✦ " + definition.name();
         for (Component line : existing) {
-            if (Text.strip(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(line))
-                    .startsWith(prefix)) {
+            String plain = Text.strip(net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
+                    .plainText().serialize(line)).trim();
+            if (plain.startsWith(legacyPrefix) || plain.startsWith(epicPrefix)) {
                 continue;
             }
             lore.add(line);
         }
-        Map<String, String> values = new LinkedHashMap<>();
-        values.put("level", String.valueOf(level));
+        Map<String, String> values = definition.placeholders(level);
         for (String line : definition.appliedLore()) {
             lore.add(Text.c(Text.apply(line, values)));
         }
@@ -261,9 +258,7 @@ public class ItemFactory {
         meta = item.getItemMeta();
         if (meta != null) {
             ConfigurationSection book = config.get("items.yml").getConfigurationSection("items.ability_book");
-            Map<String, String> values = new LinkedHashMap<>();
-            values.put("ability_name", definition.name());
-            values.put("level", String.valueOf(level));
+            Map<String, String> values = definition.placeholders(level);
             String name = book == null ? "&b%ability_name%" : book.getString("name", "&b%ability_name%");
             meta.displayName(Text.c(Text.apply(name, values)));
             List<Component> lore = new ArrayList<>();

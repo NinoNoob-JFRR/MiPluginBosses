@@ -14,6 +14,9 @@ import java.util.TreeMap;
  */
 public class AbilityDefinition {
 
+    /** Multiplicador global del coste de comida (config.yml abilities.food-cost-multiplier). */
+    private static double foodCostMultiplier = 1.0;
+
     private final String id;
     private final String name;
     private final String type;
@@ -182,6 +185,83 @@ public class AbilityDefinition {
     public int costAmount() {
         Object value = cost.get("amount");
         return value instanceof Number n ? n.intValue() : 0;
+    }
+
+    /**
+     * Aplica el multiplicador global de comida a un coste en crudo.
+     * Los costes positivos nunca bajan de 1 para que la habilidad siga
+     * teniendo un precio.
+     */
+    public static int scaleFoodCost(int raw) {
+        if (raw <= 0) {
+            return 0;
+        }
+        if (foodCostMultiplier >= 0.999) {
+            return raw;
+        }
+        return Math.max(1, (int) Math.round(raw * foodCostMultiplier));
+    }
+
+    public static void foodCostMultiplier(double value) {
+        foodCostMultiplier = Math.max(0.0, value);
+    }
+
+    public static double foodCostMultiplier() {
+        return foodCostMultiplier;
+    }
+
+    /** Coste de comida del nivel indicado, ya con el multiplicador global. */
+    public int foodCost(int level) {
+        return scaleFoodCost(integer(level, "food_cost", costAmount()));
+    }
+
+    /** Coste base (sin nivel), ya con el multiplicador global. */
+    public int baseFoodCost() {
+        return scaleFoodCost(costAmount());
+    }
+
+    /**
+     * Placeholders completos de un nivel: datos de la habilidad y todas las
+     * claves definidas en levels.<nivel> (multiplier, radius, chance...).
+     * Evita que los lores y mensajes muestren %claves% sin sustituir.
+     */
+    public Map<String, String> placeholders(int level) {
+        Map<String, String> values = new LinkedHashMap<>();
+        values.put("ability_id", id);
+        values.put("ability_name", name);
+        values.put("ability_type", type);
+        values.put("ability_description", description);
+        values.put("ability_tier", String.valueOf(tier));
+        values.put("ability_max_level", String.valueOf(maxLevel));
+        values.put("level", String.valueOf(level));
+        values.put("interval_seconds", String.valueOf(integer(level, "interval_seconds", intervalSeconds)));
+        values.put("food_cost", String.valueOf(foodCost(level)));
+        for (Map.Entry<String, Object> entry : level(level).entrySet()) {
+            values.putIfAbsent(entry.getKey(), formatValue(entry.getValue()));
+        }
+        return values;
+    }
+
+    private String formatValue(Object value) {
+        if (value instanceof Number n) {
+            double number = n.doubleValue();
+            if (Math.abs(number - Math.rint(number)) < 0.0001) {
+                return String.valueOf((long) Math.rint(number));
+            }
+            return String.format(Locale.US, "%.2f", number);
+        }
+        return value == null ? "" : String.valueOf(value);
+    }
+
+    /** Valor numerico suelto dentro de evolution: (point-multiplier, food-cost...). */
+    public double evolutionNum(String key, double def) {
+        Object value = evolution.get(key);
+        return value instanceof Number n ? n.doubleValue() : def;
+    }
+
+    public boolean evolutionBool(String key, boolean def) {
+        Object value = evolution.get(key);
+        return value instanceof Boolean bool ? bool : def;
     }
 
     public String id() {

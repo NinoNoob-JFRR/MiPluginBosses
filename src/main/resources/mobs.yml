@@ -26,6 +26,9 @@ mobs:
   # Multiplicadores sobre los stats base del mob.
   # health/damage/speed/xp son multiplicadores.
   # armor/toughness son valores sumados.
+  # stats-multiplier escala health/damage/armor/toughness/xp de todos los
+  # tiers a la vez (3.0 = tres veces mas poderosos). No afecta a la velocidad.
+  stats-multiplier: 3.0
   stats:
     1:  { health: 1.00, damage: 1.00, armor: 0.0, toughness: 0.0, speed: 0.00, xp: 1.00 }
     2:  { health: 1.33, damage: 1.11, armor: 1.0, toughness: 0.6, speed: 0.02, xp: 1.56 }

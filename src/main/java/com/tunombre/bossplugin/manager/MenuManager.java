@@ -1153,10 +1153,10 @@ public class MenuManager {
 
     private String costText(AbilityDefinition definition) {
         if (definition.id().equalsIgnoreCase("waypoint")) {
-            return "Guardar " + definition.nestedCost("save", 2)
-                    + " / TP " + definition.nestedCost("teleport", 5) + " comida";
+            return "Guardar " + AbilityDefinition.scaleFoodCost(definition.nestedCost("save", 2))
+                    + " / TP " + AbilityDefinition.scaleFoodCost(definition.nestedCost("teleport", 5)) + " comida";
         }
-        return "Comida x" + definition.costAmount();
+        return "Comida x" + definition.baseFoodCost();
     }
 
     private String recipeText(AbilityDefinition definition) {

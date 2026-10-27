@@ -18,6 +18,10 @@
 #
 # Si un nivel define food_cost, ese valor tiene prioridad
 # sobre cost.amount (usado por TreeFeller, RepairItem y Fly).
+#
+# El coste final de comida se multiplica por
+# config.yml -> abilities.food-cost-multiplier (0.5 = la mitad).
+# Los costes positivos nunca bajan de 1.
 # ============================================================
 
 abilities:
@@ -53,7 +57,7 @@ abilities:
       - "&7Envenena al objetivo al golpear."
       - "&7Veneno: &aNivel %level% &7durante &a5s&7."
     applied_lore:
-      - "&8Poison &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: poison
 
   backstab:
@@ -84,7 +88,7 @@ abilities:
       - "&7Golpear por la espalda multiplica el dano."
       - "&7Multiplicador: &ex%multiplier%"
     applied_lore:
-      - "&8Backstab &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: backstab
 
   blinding:
@@ -109,7 +113,7 @@ abilities:
       - "&7Aplica ceguera al objetivo."
       - "&7Duracion: &a%duration_seconds%s"
     applied_lore:
-      - "&8Blinding &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: blinding
 
   call_lighting:
@@ -141,7 +145,7 @@ abilities:
       - "&7Dano: &e%damage_percent%%% &7- Radio: &e%radius%"
       - "&7Objetivos maximos: &e%max_targets%"
     applied_lore:
-      - "&8CallLighting &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: call_lighting
 
   confuse:
@@ -165,7 +169,7 @@ abilities:
       - "&7Aplica nausea al objetivo."
       - "&7Duracion: &a6s"
     applied_lore:
-      - "&8Confuse"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: confuse
 
   disarm:
@@ -193,7 +197,7 @@ abilities:
       - "&7Probabilidad de desarmar al objetivo."
       - "&7Probabilidad: &e%chance%%%"
     applied_lore:
-      - "&8Disarm &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: disarm
 
   slow:
@@ -217,7 +221,7 @@ abilities:
       - "&7Aplica lentitud al objetivo."
       - "&7Duracion: &a5s"
     applied_lore:
-      - "&8Slow"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: slow
 
   vampiric_regeneration:
@@ -245,7 +249,7 @@ abilities:
       - "&7Al golpear, &e20%&7 de robar vida."
       - "&7Vida robada: &c%steal_percent%%%"
     applied_lore:
-      - "&8VampiricRegeneration &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: vampiric_regeneration
 
   weaken:
@@ -269,7 +273,7 @@ abilities:
       - "&7Aplica debilidad al objetivo."
       - "&7Duracion: &a6s"
     applied_lore:
-      - "&8Weaken"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: weaken
 
   fertilize:
@@ -290,7 +294,7 @@ abilities:
       - "&7Activa: fertiliza el area alrededor."
       - "&7Radio: &a%radius%"
     applied_lore:
-      - "&8Fertilize &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: fertilize
 
   craft_item:
@@ -309,7 +313,7 @@ abilities:
     lore:
       - "&7Activa: abre una mesa de crafteo."
     applied_lore:
-      - "&8CraftItem"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: craft_item
 
   # ----------------------------------------------------------
@@ -334,7 +338,7 @@ abilities:
       - "&7Mina toda la veta de una vez."
       - "&7Bloques maximos: &a%max_blocks%"
     applied_lore:
-      - "&8VeinMiner &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: vein_miner
 
   tree_feller:
@@ -356,7 +360,7 @@ abilities:
       - "&7Tala el arbol completo."
       - "&7Troncos maximos: &a%max_logs%"
     applied_lore:
-      - "&8TreeFeller &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: tree_feller
 
   magnet:
@@ -378,7 +382,7 @@ abilities:
       - "&7Atrae items cercanos."
       - "&7Radio: &a%radius% &7- Cada &a%interval_seconds%s"
     applied_lore:
-      - "&8Magnet &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: magnet
 
   ender_bag:
@@ -397,7 +401,7 @@ abilities:
     lore:
       - "&7Activa: abre un cofre de ender."
     applied_lore:
-      - "&8EnderBag"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: ender_bag
 
   # ----------------------------------------------------------
@@ -429,7 +433,7 @@ abilities:
       - "&7Probabilidad: &a%avoid_break_chance%%%"
       - "&7Repara &a%repair_per_interval%&7 durabilidad cada &a5s&7."
     applied_lore:
-      - "&8Durability &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: durability
 
   regeneration:
@@ -454,7 +458,7 @@ abilities:
       - "&7Aplica regeneracion cada &a5s&7."
       - "&7Nivel: &a%effect_level%"
     applied_lore:
-      - "&8Regeneration &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: regeneration
 
   bleed:
@@ -481,7 +485,7 @@ abilities:
       - "&7El objetivo sangra al golpear."
       - "&7Dano: &c%damage_per_second%/s &7durante &c%duration_seconds%s"
     applied_lore:
-      - "&8Bleed &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: bleed
 
   armor_piercer:
@@ -508,7 +512,7 @@ abilities:
       - "&7Ignora parte de la armadura."
       - "&7Armadura ignorada: &a%ignore_armor_percent%%%"
     applied_lore:
-      - "&8ArmorPiercer &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: armor_piercer
 
   waypoint:
@@ -543,7 +547,7 @@ abilities:
       - "&7Activa: guarda y teletransporta."
       - "&7Slots: &a%max_slots%"
     applied_lore:
-      - "&8Waypoint &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: waypoint
 
   # ----------------------------------------------------------
@@ -551,27 +555,27 @@ abilities:
   # ----------------------------------------------------------
   speed:
     name: "Speed"
-    type: PASSIVE
-    apply_to: GEAR
-    description: "Velocidad pasiva."
+    type: ACTIVE
+    apply_to: BOOK
+    description: "Aumenta tu velocidad al usarla."
     icon: SUGAR
     tier: 4
     max_level: 5
-    compatible_with: [BOOTS, LEGGINGS]
-    trigger: ON_INTERVAL
+    compatible_with: [BOOK]
+    trigger: ACTIVE
     levels:
-      1: { effect_level: 1 }
-      2: { effect_level: 2 }
-      3: { effect_level: 3 }
-      4: { effect_level: 4 }
-      5: { effect_level: 5 }
-    interval_seconds: 5
-    cost: { type: FOOD, amount: 1, per: INTERVAL }
+      1: { effect_level: 1, duration_seconds: 20 }
+      2: { effect_level: 2, duration_seconds: 25 }
+      3: { effect_level: 3, duration_seconds: 30 }
+      4: { effect_level: 4, duration_seconds: 35 }
+      5: { effect_level: 5, duration_seconds: 45 }
+    cost: { type: FOOD, amount: 2, per: TRIGGER }
     lore:
-      - "&7Velocidad pasiva."
+      - "&7Activa: aumenta tu velocidad."
       - "&7Nivel: &a%effect_level%"
+      - "&7Duracion: &a%duration_seconds%s"
     applied_lore:
-      - "&8Speed &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: speed
 
   magic_bag:
@@ -591,7 +595,7 @@ abilities:
       - "&7Activa: abre una mochila de 27 slots."
       - "&7El contenido se guarda por jugador."
     applied_lore:
-      - "&8MagicBag"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: magic_bag
 
   greater_burst:
@@ -614,7 +618,7 @@ abilities:
       - "&7Radio: &a%radius% &7- Fuerza: &a%force%"
       - "&7No rompe bloques ni hace dano."
     applied_lore:
-      - "&8GreaterBurst &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: greater_burst
 
   repair_item:
@@ -638,7 +642,7 @@ abilities:
       - "&7Activa: repara el item en la mano."
       - "&7Reparacion: &a%repair_percent%%%"
     applied_lore:
-      - "&8RepairItem &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: repair_item
 
   fly:
@@ -662,7 +666,7 @@ abilities:
       - "&7Vuelo pasivo."
       - "&7Coste: &a%food_cost%&7 comida cada &a%interval_seconds%s"
     applied_lore:
-      - "&8Fly &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: fly
 
   hardy:
@@ -691,7 +695,7 @@ abilities:
       - "&7Corazones: &a%absorption_hearts%"
       - "&7Se refresca cada &a10s&7."
     applied_lore:
-      - "&8Hardy &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: hardy
 
   evolution:
@@ -705,28 +709,32 @@ abilities:
     compatible_with: [CHESTPLATE]
     trigger: ON_KILL
     levels:
-      1: { normal_mob_chance: 5, boss_chance: 20, normal_points: 1, boss_points: 1 }
-      2: { normal_mob_chance: 10, boss_chance: 20, normal_points: 1, boss_points: 2 }
-      3: { normal_mob_chance: 15, boss_chance: 20, normal_points: 2, boss_points: 3 }
+      1: { normal_mob_chance: 15, boss_chance: 50, normal_points: 1, boss_points: 3 }
+      2: { normal_mob_chance: 25, boss_chance: 75, normal_points: 2, boss_points: 5 }
+      3: { normal_mob_chance: 40, boss_chance: 100, normal_points: 3, boss_points: 8 }
     cost: { type: FOOD, amount: 1, per: POINT }
     evolution:
       only_highest_instance: true
       activates_only_when_equipped: true
       boss_always_counts: true
+      # Multiplica los puntos obtenidos por cada kill.
+      point-multiplier: 1.0
+      # Comida que cuesta cada activacion (no por punto).
+      food-cost: 1
       caps:
-        max_health: 15
-        armor: 10
-        toughness: 6
-        attack_damage: 5
-        attack_speed: 0.6
-        movement_speed: 0.03
-        knockback_resistance: 0.5
-        luck: 5
+        max_health: 60
+        armor: 30
+        toughness: 20
+        attack_damage: 20
+        attack_speed: 1.2
+        movement_speed: 0.06
+        knockback_resistance: 0.8
+        luck: 10
       increments:
         max_health: 1
         armor: 1
         toughness: 1
-        attack_damage: 0.5
+        attack_damage: 1
         attack_speed: 0.1
         movement_speed: 0.005
         knockback_resistance: 0.05
@@ -756,5 +764,5 @@ abilities:
       - "&7Solo funciona mientras esta equipada."
       - "&7Solo cuenta la instancia de mayor nivel."
     applied_lore:
-      - "&8Evolution &7Nv.%level%"
+      - "&4&l✦ &c&l%ability_name% &8&lNv.%level%"
     recipe: evolution

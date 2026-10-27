@@ -12,7 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Migracion automatica: anade claves nuevas sin borrar la configuracion
@@ -23,7 +25,7 @@ import java.util.List;
 public class ConfigMigrator {
 
     /** Version de configuracion que aplica este plugin. */
-    private static final int CURRENT_VERSION = 2;
+    private static final int CURRENT_VERSION = 3;
     private static final String VERSION_FILE = ".migration-version";
 
     private final Main plugin;
@@ -72,6 +74,7 @@ public class ConfigMigrator {
         }
 
         migrateV2(backup);
+        migrateV3(backup);
     }
 
     /**
@@ -85,7 +88,7 @@ public class ConfigMigrator {
         migrateDropsV2(backup);
         migrateMenusV2(backup);
         migrateEssenceV2(backup);
-        writeVersion(CURRENT_VERSION);
+        writeVersion(2);
         plugin.getLogger().info("Migracion de configuracion v2 aplicada.");
     }
 
@@ -151,13 +154,144 @@ public class ConfigMigrator {
         }
     }
 
+    /**
+     * v3: Speed pasa a habilidad activa (libro), Evolution sube sus limites
+     * y el lore aplicado muestra el nombre de la habilidad en rojo epico.
+     */
+    private void migrateV3(boolean backup) {
+        if (readVersion() >= 3) {
+            return;
+        }
+        migrateEssenceV3(backup);
+        migrateItemsV3(backup);
+        writeVersion(3);
+        plugin.getLogger().info("Migracion de configuracion v3 aplicada.");
+    }
+
+    private void migrateEssenceV3(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "essence_abilities.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        boolean changed = false;
+
+        // Speed: de pasiva en botas a activa en libro.
+        String speed = "abilities.speed";
+        if (yml.contains(speed)) {
+            changed |= setIfDifferent(yml, speed + ".type", "ACTIVE");
+            changed |= setIfDifferent(yml, speed + ".apply_to", "BOOK");
+            changed |= setIfDifferent(yml, speed + ".compatible_with", List.of("BOOK"));
+            changed |= setIfDifferent(yml, speed + ".trigger", "ACTIVE");
+            changed |= setIfDifferent(yml, speed + ".description", "Aumenta tu velocidad al usarla.");
+            changed |= setIfDifferent(yml, speed + ".cost.amount", 2);
+            if (yml.contains(speed + ".interval_seconds")) {
+                yml.set(speed + ".interval_seconds", null);
+                changed = true;
+            }
+            Map<String, Object> levels = new LinkedHashMap<>();
+            int[] durations = {20, 25, 30, 35, 45};
+            for (int level = 1; level <= 5; level++) {
+                Map<String, Object> values = new LinkedHashMap<>();
+                values.put("effect_level", level);
+                values.put("duration_seconds", durations[level - 1]);
+                levels.put(String.valueOf(level), values);
+            }
+            changed |= setIfDifferent(yml, speed + ".levels", levels);
+            changed |= setIfDifferent(yml, speed + ".lore", List.of(
+                    "&7Activa: aumenta tu velocidad.",
+                    "&7Nivel: &a%effect_level%",
+                    "&7Duracion: &a%duration_seconds%s"));
+        }
+
+        // Evolution: limites mas altos y coste de comida plano por activacion.
+        String evolution = "abilities.evolution";
+        if (yml.contains(evolution)) {
+            Map<String, Object> levels = new LinkedHashMap<>();
+            levels.put("1", evolutionLevel(15, 50, 1, 3));
+            levels.put("2", evolutionLevel(25, 75, 2, 5));
+            levels.put("3", evolutionLevel(40, 100, 3, 8));
+            changed |= setIfDifferent(yml, evolution + ".levels", levels);
+
+            Map<String, Object> caps = new LinkedHashMap<>();
+            caps.put("max_health", 60);
+            caps.put("armor", 30);
+            caps.put("toughness", 20);
+            caps.put("attack_damage", 20);
+            caps.put("attack_speed", 1.2);
+            caps.put("movement_speed", 0.06);
+            caps.put("knockback_resistance", 0.8);
+            caps.put("luck", 10);
+            changed |= setIfDifferent(yml, evolution + ".evolution.caps", caps);
+
+            Map<String, Object> increments = new LinkedHashMap<>();
+            increments.put("max_health", 1);
+            increments.put("armor", 1);
+            increments.put("toughness", 1);
+            increments.put("attack_damage", 1);
+            increments.put("attack_speed", 0.1);
+            increments.put("movement_speed", 0.005);
+            increments.put("knockback_resistance", 0.05);
+            increments.put("luck", 1);
+            changed |= setIfDifferent(yml, evolution + ".evolution.increments", increments);
+            changed |= setIfDifferent(yml, evolution + ".evolution.point-multiplier", 1.0);
+            changed |= setIfDifferent(yml, evolution + ".evolution.food-cost", 1);
+        }
+
+        // Lore aplicado epico en rojo para todas las habilidades.
+        ConfigurationSection abilities = yml.getConfigurationSection("abilities");
+        if (abilities != null) {
+            String epic = "&4&l✦ &c&l%ability_name% &8&lNv.%level%";
+            for (String id : abilities.getKeys(false)) {
+                changed |= setIfDifferent(yml, "abilities." + id + ".applied_lore", List.of(epic));
+            }
+        }
+
+        if (changed) {
+            saveMigrated(yml, file, "essence_abilities.yml", backup);
+        }
+    }
+
+    private Map<String, Object> evolutionLevel(int normalChance, int bossChance,
+                                               int normalPoints, int bossPoints) {
+        Map<String, Object> values = new LinkedHashMap<>();
+        values.put("normal_mob_chance", normalChance);
+        values.put("boss_chance", bossChance);
+        values.put("normal_points", normalPoints);
+        values.put("boss_points", bossPoints);
+        return values;
+    }
+
+    private void migrateItemsV3(boolean backup) {
+        File file = new File(plugin.getDataFolder(), "items.yml");
+        if (!file.exists()) {
+            return;
+        }
+        YamlConfiguration yml = YamlConfiguration.loadConfiguration(file);
+        String path = "items.ability_book.usage";
+        String current = yml.getString(path, "");
+        if (current.toLowerCase(java.util.Locale.ROOT).contains("en el aire")
+                && !current.toLowerCase(java.util.Locale.ROOT).contains("bloque")) {
+            yml.set(path, "&8Haz clic derecho en el aire o en un bloque para usar.");
+            saveMigrated(yml, file, "items.yml", backup);
+        }
+    }
+
+    private boolean setIfDifferent(YamlConfiguration yml, String path, Object value) {
+        if (java.util.Objects.equals(yml.get(path), value)) {
+            return false;
+        }
+        yml.set(path, value);
+        return true;
+    }
+
     private void saveMigrated(YamlConfiguration yml, File file, String name, boolean backup) {
         try {
             if (backup) {
                 backup(file, name);
             }
             yml.save(file);
-            plugin.getLogger().info("Configuracion actualizada a v2: " + name);
+            plugin.getLogger().info("Configuracion actualizada (v" + CURRENT_VERSION + "): " + name);
         } catch (Exception e) {
             plugin.getLogger().warning("No se pudo actualizar " + name + ": " + e.getMessage());
         }
